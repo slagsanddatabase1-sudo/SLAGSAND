@@ -130,11 +130,13 @@ app.post("/api/order", async (req, res) => {
 app.use(express.static(path.join(__dirname, "../dist")));
 
 // Handle SPA routing - serve index.html for any unknown routes
-app.get("(.*)", (req, res) => {
-    // Skip if it looks like an API route (unlikely to reach here if API routes are defined above)
+// Using app.use() fallback to avoid Express 5 path-to-regexp wildcard syntax issues
+app.use((req, res) => {
+    // If it's an API request that wasn't handled, return 404
     if (req.path.startsWith('/api')) {
-        return res.status(404).json({ error: "Not Found" });
+        return res.status(404).json({ error: "API endpoint not found" });
     }
+    // Otherwise serve index.html for React routing
     res.sendFile(path.join(__dirname, "../dist/index.html"));
 });
 
