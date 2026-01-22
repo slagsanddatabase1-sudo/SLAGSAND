@@ -29,8 +29,8 @@ app.use((req, res, next) => {
     next();
 });
 
-app.get("/", (req, res) => {
-    console.log("✓ Health check endpoint hit");
+// Health check endpoint (renamed to avoid conflict with frontend)
+app.get("/api/health", (req, res) => {
     res.send("server is running!");
 });
 
