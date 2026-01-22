@@ -130,7 +130,7 @@ app.post("/api/order", async (req, res) => {
 app.use(express.static(path.join(__dirname, "../dist")));
 
 // Handle SPA routing - serve index.html for any unknown routes
-app.get("*", (req, res) => {
+app.get("(.*)", (req, res) => {
     // Skip if it looks like an API route (unlikely to reach here if API routes are defined above)
     if (req.path.startsWith('/api')) {
         return res.status(404).json({ error: "Not Found" });
