@@ -2,6 +2,7 @@ const express = require("express");
 const Razorpay = require("razorpay");
 const cors = require("cors");
 const crypto = require("crypto");
+const path = require("path");
 
 require("dotenv").config({ path: "../.env" });
 
@@ -124,6 +125,18 @@ app.post("/api/order", async (req, res) => {
         });
     }
 })
+
+// Serve static files from the dist directory
+app.use(express.static(path.join(__dirname, "../dist")));
+
+// Handle SPA routing - serve index.html for any unknown routes
+app.get("*", (req, res) => {
+    // Skip if it looks like an API route (unlikely to reach here if API routes are defined above)
+    if (req.path.startsWith('/api')) {
+        return res.status(404).json({ error: "Not Found" });
+    }
+    res.sendFile(path.join(__dirname, "../dist/index.html"));
+});
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, '0.0.0.0', () => {

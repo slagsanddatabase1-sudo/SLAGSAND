@@ -81,7 +81,8 @@ const Checkout = () => {
             };
             console.log("Order payload:", orderPayload);
 
-            const response = await fetch('/api/order', {
+            const baseURL = import.meta.env.VITE_API_BASE_URL || '';
+            const response = await fetch(`${baseURL}/api/order`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -113,8 +114,9 @@ const Checkout = () => {
                     console.log("✓ Payment successful, validating...");
                     console.log("Payment response:", response);
 
+                    const baseURL = import.meta.env.VITE_API_BASE_URL || '';
                     // On Success, validate signature
-                    const validateRes = await fetch('/api/validate', {
+                    const validateRes = await fetch(`${baseURL}/api/validate`, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json'

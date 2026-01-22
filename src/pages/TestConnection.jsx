@@ -51,7 +51,8 @@ const TestConnection = () => {
 
             // 4. Test Backend
             addLog('Testing Backend Connection (/api)...');
-            const backendRes = await fetch('/api');
+            const baseURL = import.meta.env.VITE_API_BASE_URL || '';
+            const backendRes = await fetch(`${baseURL}/api`);
             if (backendRes.ok) {
                 const text = await backendRes.text();
                 addLog(`✅ Backend Reachable: ${text}`);
