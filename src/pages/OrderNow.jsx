@@ -68,14 +68,15 @@ const OrderNow = () => {
                     pincodeData = data[0];
 
                     // Check delivery status first
-                    if (pincodeData.deliverystatus === 'No Delivery') {
+                    const status = pincodeData.delivery_status || pincodeData.deliverystatus;
+                    if (status === 'No Delivery') {
                         setError("Delivery not available for this pincode.");
                         setLoadingPrice(false);
                         return;
                     }
 
                     // Use final_price as the unit price per Ton
-                    unitPrice = parseFloat(pincodeData.final_price) || 0;
+                    unitPrice = parseFloat(pincodeData.final_price || pincodeData.price_ton || pincodeData.slag_basicrate) || 0;
 
                     // Auto-fill City from DB
                     if (pincodeData.city) {

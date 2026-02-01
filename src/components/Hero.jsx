@@ -64,12 +64,13 @@ const Hero = ({ onGetSampleClick }) => {
 
             if (data && data.length > 0) {
                 const pincodeData = data[0];
-                // Use final_price if available, otherwise fallback
-                if (calcData.measure === 'Ton') unitPrice = parseFloat(pincodeData.final_price) || 0;
-                // Note: final_price is generally per Ton. Brass/Foot logic would need conversion if not explicitly stored.
-                // Assuming final_price IS the per-ton price.
-                else if (calcData.measure === 'Brass') unitPrice = (parseFloat(pincodeData.final_price) || 0) * 2.5; // Approx conversion if needed, or fallback
-                else if (calcData.measure === 'Foot') unitPrice = (parseFloat(pincodeData.final_price) || 0) / 20; // Approx conversion
+                if (calcData.measure === 'Ton') {
+                    unitPrice = parseFloat(pincodeData.final_price || pincodeData.price_ton || pincodeData.slag_basicrate) || 0;
+                } else if (calcData.measure === 'Brass') {
+                    unitPrice = (parseFloat(pincodeData.final_price || pincodeData.price_ton) || 0) * 2.5;
+                } else if (calcData.measure === 'Foot') {
+                    unitPrice = (parseFloat(pincodeData.final_price || pincodeData.price_ton) || 0) / 20;
+                }
 
                 // If the specific legacy columns exist and are non-zero, we COULD use them, but user said "use final price".
                 // So we stick to final_price for Ton.

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Container, Table, Button, Badge, Spinner, Modal, Form, Row, Col, Alert, Tabs, Tab } from 'react-bootstrap';
+import { Container, Table, Button, Badge, Spinner, Modal, Form, Row, Col, Alert, Tabs, Tab, Card } from 'react-bootstrap';
 import { supabase } from '../../lib/supabase';
-import { MapPin, Plus, Edit2, Trash2, Upload, Download, Search, ToggleLeft, ToggleRight, Info, ChevronLeft, ChevronRight } from 'lucide-react';
+import { MapPin, Plus, Edit2, Trash2, Upload, Download, Search, ToggleLeft, ToggleRight, Info, ChevronLeft, ChevronRight, Calculator } from 'lucide-react';
 import Papa from 'papaparse';
 
 const Pincodes = () => {
@@ -11,6 +11,97 @@ const Pincodes = () => {
     const [showModal, setShowModal] = useState(false);
     const [editMode, setEditMode] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
+    const [statusFilter, setStatusFilter] = useState('All');
+    const [districtFilter, setDistrictFilter] = useState('All');
+    const [globalRates, setGlobalRates] = useState({
+        slag_basicrate: '',
+        transportation_by_truck: '',
+        unloading_charges: '',
+        per_km_rate: ''
+    });
+    const [districts, setDistricts] = useState([]);
+
+    const handleGlobalUpdate = async () => {
+        if (!window.confirm('This will update specified rates for ALL pincodes. Are you sure?')) return;
+
+        try {
+            setLoading(true);
+
+            // 1. Save to global_configs table
+            const configUpdates = Object.entries(globalRates)
+                .filter(([key, value]) => value !== '')
+                .map(([key, value]) => ({ key, value }));
+
+            if (configUpdates.length > 0) {
+                const { error: configError } = await supabase
+                    .from('global_configs')
+                    .upsert(configUpdates);
+                if (configError) throw configError;
+            }
+
+            // 2. Update all pincodes in database
+            const updateData = {};
+            if (globalRates.slag_basicrate) updateData.slag_basicrate = globalRates.slag_basicrate;
+            if (globalRates.transportation_by_truck) updateData.transportation_by_truck = globalRates.transportation_by_truck;
+            if (globalRates.unloading_charges) updateData.unloading_charges = globalRates.unloading_charges;
+            if (globalRates.per_km_rate) updateData.per_km_rate = globalRates.per_km_rate;
+
+            if (Object.keys(updateData).length === 0) {
+                alert('Please enter at least one value to update');
+                setLoading(false);
+                return;
+            }
+
+            const { error } = await supabase
+                .from('pincodes')
+                .update(updateData)
+                .neq('id', 0);
+
+            if (error) throw error;
+
+            // Re-calculate final prices for all
+            const { data: allPincodes, error: fetchError } = await supabase
+                .from('pincodes')
+                .select('*');
+
+            if (fetchError) throw fetchError;
+
+            for (const p of allPincodes) {
+                const basic = parseFloat(p.slag_basicrate) || 0;
+                const transport = parseFloat(p.transportation_by_truck) || 0;
+                const unloading = parseFloat(p.unloading_charges) || 0;
+                const km = parseFloat(p.km) || 0;
+                const kmRate = parseFloat(p.per_km_rate) || 0;
+                const final = basic + transport + unloading + (km * kmRate);
+
+                await supabase.from('pincodes').update({ final_price: final.toFixed(2).toString() }).eq('id', p.id);
+            }
+
+            alert('Global rates updated and final prices recalculated!');
+            fetchPincodes();
+        } catch (error) {
+            console.error('Error in global update:', error);
+            alert('Global update failed: ' + error.message);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const updateCurrentPincodeWithAutoCalc = (updates) => {
+        const next = { ...currentPincode, ...updates };
+
+        // Auto Calc Formula: Final = Basic + Transport + Unloading + (Km * Per Km Rate)
+        const basic = parseFloat(next.slag_basicrate) || 0;
+        const transport = parseFloat(next.transportation_by_truck) || 0;
+        const unloading = parseFloat(next.unloading_charges) || 0;
+        const km = parseFloat(next.km) || 0;
+        const kmRate = parseFloat(next.per_km_rate) || 0;
+
+        const final = basic + transport + unloading + (km * kmRate);
+        next.final_price = final > 0 ? final.toFixed(2) : next.final_price;
+
+        setCurrentPincode(next);
+    };
 
     // Pagination state
     const [currentPage, setCurrentPage] = useState(1);
@@ -21,10 +112,14 @@ const Pincodes = () => {
         city: '',
         district: '',
         division: '',
-        deliverystatus: 'Delivery',
+        delivery_status: '',
         slag_basicrate: '',
-        transportation_rate: '',
+        transportation_by_truck: '',
         unloading_charges: '',
+        km: '',
+        forty_ton_hydraulic: '',
+        thirty_ton_hydraulic: '',
+        per_km_rate: '0',
         final_price: '',
         is_active: true
     });
@@ -34,20 +129,29 @@ const Pincodes = () => {
     }, []);
 
     useEffect(() => {
-        // Filter pincodes based on search term
-        let result = [];
+        // Filter pincodes based on search term and filters
+        let result = pincodes;
+
         if (searchTerm) {
-            result = pincodes.filter(p =>
-                p.pincode.toString().includes(searchTerm) ||
-                p.city?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                p.district?.toLowerCase().includes(searchTerm.toLowerCase())
+            const term = searchTerm.toLowerCase();
+            result = result.filter(p =>
+                (p.pincode?.toString() || '').includes(term) ||
+                (p.city || '').toLowerCase().includes(term) ||
+                (p.district || '').toLowerCase().includes(term)
             );
-        } else {
-            result = pincodes;
         }
+
+        if (statusFilter !== 'All') {
+            result = result.filter(p => (p.delivery_status || p.deliverystatus) === statusFilter);
+        }
+
+        if (districtFilter !== 'All') {
+            result = result.filter(p => (p.district || p.District) === districtFilter);
+        }
+
         setFilteredPincodes(result);
-        setCurrentPage(1); // Reset to first page on search
-    }, [searchTerm, pincodes]);
+        setCurrentPage(1);
+    }, [searchTerm, statusFilter, districtFilter, pincodes]);
 
     // Pagination logic
     const indexOfLastItem = currentPage * itemsPerPage;
@@ -70,21 +174,40 @@ const Pincodes = () => {
     // I'll execute the replacement for the import and state part now.
 
 
+    const fetchGlobalConfigs = async () => {
+        try {
+            const { data, error } = await supabase.from('global_configs').select('*');
+            if (error) throw error;
+
+            const rates = { ...globalRates };
+            data.forEach(config => {
+                if (rates.hasOwnProperty(config.key)) {
+                    rates[config.key] = config.value;
+                }
+            });
+            setGlobalRates(rates);
+            return rates;
+        } catch (error) {
+            console.error('Error fetching global configs:', error);
+            return globalRates;
+        }
+    };
+
     const fetchPincodes = async () => {
         try {
             setLoading(true);
-            // Fetch up to 5000 records to handle large datasets
-            // For production with >10000 records, server-side pagination would be better
-            // but this works for the current scale of 2000+
+            await fetchGlobalConfigs();
             const { data, error } = await supabase
                 .from('pincodes')
                 .select('*')
-                .order('pincode', { ascending: true })
-                .range(0, 4999);
+                .order('city', { ascending: true });
 
             if (error) throw error;
             setPincodes(data || []);
             setFilteredPincodes(data || []);
+
+            const uniqueDistricts = [...new Set((data || []).map(p => p.district || p.District).filter(Boolean))].sort();
+            setDistricts(uniqueDistricts);
         } catch (error) {
             console.error('Error fetching pincodes:', error);
             alert('Failed to fetch pincodes');
@@ -98,27 +221,36 @@ const Pincodes = () => {
             setEditMode(true);
             setCurrentPincode({
                 ...pincode,
-                // Ensure all fields have values (not null)
-                city: pincode.city || '',
-                district: pincode.district || '',
-                division: pincode.division || '',
-                deliverystatus: pincode.deliverystatus || 'Delivery',
+                city: pincode.city || pincode.City || '',
+                pincode: pincode.pincode || pincode.Pincode || '',
+                district: pincode.district || pincode.District || '',
+                division: pincode.division || pincode.Division || '',
+                delivery_status: pincode.delivery_status || pincode.deliverystatus || '',
                 slag_basicrate: pincode.slag_basicrate || '',
-                transportation_rate: pincode.transportation_rate || '',
+                transportation_by_truck: pincode.transportation_by_truck || pincode.transport_rate || pincode['transportation By truck'] || '',
                 unloading_charges: pincode.unloading_charges || '',
+                km: pincode.km || pincode['Km '] || '',
+                forty_ton_hydraulic: pincode.forty_ton_hydraulic || pincode.forty_ton_hydraulic_type || pincode['40 Ton hydrallic Type'] || '',
+                thirty_ton_hydraulic: pincode.thirty_ton_hydraulic || pincode.thirty_ton_hydraulic_type || pincode['30 Ton hydrallic type'] || '',
+                per_km_rate: pincode.per_km_rate || '0',
                 final_price: pincode.final_price || ''
             });
         } else {
             setEditMode(false);
+            // Pre-fill with global rates for new pincode
             setCurrentPincode({
                 pincode: '',
                 city: '',
                 district: '',
                 division: '',
-                deliverystatus: 'Delivery',
-                slag_basicrate: '',
-                transportation_rate: '',
-                unloading_charges: '',
+                delivery_status: 'Delivery',
+                slag_basicrate: globalRates.slag_basicrate || '',
+                transportation_by_truck: globalRates.transportation_by_truck || '',
+                unloading_charges: globalRates.unloading_charges || '',
+                km: '',
+                forty_ton_hydraulic: '',
+                thirty_ton_hydraulic: '',
+                per_km_rate: globalRates.per_km_rate || '0',
                 final_price: '',
                 is_active: true
             });
@@ -139,11 +271,15 @@ const Pincodes = () => {
                 city: currentPincode.city || null,
                 district: currentPincode.district || null,
                 division: currentPincode.division || null,
-                deliverystatus: currentPincode.deliverystatus || 'Delivery',
-                slag_basicrate: parseFloat(currentPincode.slag_basicrate) || 0,
-                transportation_rate: parseFloat(currentPincode.transportation_rate) || 0,
-                unloading_charges: parseFloat(currentPincode.unloading_charges) || 0,
-                final_price: parseFloat(currentPincode.final_price) || 0,
+                delivery_status: currentPincode.delivery_status || null,
+                slag_basicrate: currentPincode.slag_basicrate?.toString() || null,
+                transportation_by_truck: currentPincode.transportation_by_truck?.toString() || null,
+                unloading_charges: currentPincode.unloading_charges?.toString() || null,
+                km: currentPincode.km?.toString() || null,
+                forty_ton_hydraulic: currentPincode.forty_ton_hydraulic?.toString() || null,
+                thirty_ton_hydraulic: currentPincode.thirty_ton_hydraulic?.toString() || null,
+                per_km_rate: currentPincode.per_km_rate?.toString() || '0',
+                final_price: currentPincode.final_price?.toString() || null,
                 is_active: currentPincode.is_active
             };
 
@@ -237,18 +373,23 @@ const Pincodes = () => {
                     setLoading(true);
                     const validData = results.data
                         .filter(row => row.pincode && row.pincode.toString().trim())
-                        .map(row => ({
-                            pincode: row.pincode.toString().trim(),
-                            city: row.city?.trim() || null,
-                            district: row.district?.trim() || null,
-                            division: row.division?.trim() || null,
-                            deliverystatus: row.deliverystatus?.trim() || row.deliverystatus?.trim() || 'Delivery',
-                            slag_basicrate: parseFloat(row.slag_basicrate || 0),
-                            transportation_rate: parseFloat(row.transportation_rate || 0),
-                            unloading_charges: parseFloat(row.unloading_charges || 0),
-                            final_price: parseFloat(row.final_price || 0)
-                            // is_active will use database default (true)
-                        }));
+                        .map(row => {
+                            const p = row.pincode || row.Pincode || row.PINCODE;
+                            return {
+                                pincode: p?.toString().trim(),
+                                city: (row.city || row.City)?.trim() || null,
+                                district: (row.district || row.District)?.trim() || null,
+                                division: (row.division || row.Division)?.trim() || null,
+                                delivery_status: (row.delivery_status || row.deliverystatus || row['Delivery Status'] || row['delivery_status'])?.trim() || null,
+                                slag_basicrate: (row.slag_basicrate || row.Slag_basicrate || row['Slag Basicrate'] || row['slag_basicrate'])?.toString() || null,
+                                transportation_by_truck: (row.transportation_by_truck || row.transport_rate || row.transportation_rate || row['transportation By truck'] || row['Transportation by truck'])?.toString() || null,
+                                unloading_charges: (row.unloading_charges || row['Unloading charges'] || row['unloading_charges'])?.toString() || null,
+                                km: (row.km || row.KM || row.Km || row['Km '] || row['km'])?.toString() || null,
+                                forty_ton_hydraulic: (row.forty_ton_hydraulic || row.forty_ton_hydraulic_type || row['40 Ton hydrallic Type'] || row['40 Ton'])?.toString() || null,
+                                thirty_ton_hydraulic: (row.thirty_ton_hydraulic || row.thirty_ton_hydraulic_type || row['30 Ton hydrallic type'] || row['30 Ton'])?.toString() || null,
+                                final_price: (row.final_price || row['Final Price'] || row['final_price'])?.toString() || null
+                            };
+                        });
 
                     if (validData.length === 0) {
                         alert('No valid data found in CSV');
@@ -310,13 +451,16 @@ const Pincodes = () => {
         const csvData = pincodes.map(p => ({
             city: p.city || '',
             pincode: p.pincode,
-            deliverystatus: p.deliverystatus || 'Delivery',
+            deliverystatus: p.deliverystatus || '',
             district: p.district || '',
             division: p.division || '',
-            slag_basicrate: p.slag_basicrate || 0,
-            transportation_rate: p.transportation_rate || 0,
-            unloading_charges: p.unloading_charges || 0,
-            final_price: p.final_price || 0,
+            slag_basicrate: p.slag_basicrate || '',
+            'transportation By truck': p['transportation By truck'] || '',
+            unloading_charges: p.unloading_charges || '',
+            'Km ': p['Km '] || '',
+            '40 Ton hydrallic Type': p['40 Ton hydrallic Type'] || '',
+            '30 Ton hydrallic type': p['30 Ton hydrallic type'] || '',
+            final_price: p.final_price || '',
             is_active: p.is_active
         }));
 
@@ -357,18 +501,86 @@ const Pincodes = () => {
                 </div>
             </div>
 
-            {/* Search Bar */}
-            <div className="mb-3">
-                <div className="position-relative" style={{ maxWidth: '400px' }}>
-                    <Search size={18} className="position-absolute text-muted" style={{ left: '12px', top: '50%', transform: 'translateY(-50%)' }} />
-                    <Form.Control
-                        type="text"
-                        placeholder="Search by pincode, city, or district..."
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        className="ps-5"
-                    />
-                </div>
+            {/* Global Pricing Update Section */}
+            <Card className="border-0 shadow-sm rounded-4 mb-4 bg-light">
+                <Card.Body className="p-4">
+                    <h5 className="fw-bold mb-3 d-flex align-items-center gap-2">
+                        <Calculator size={20} className="text-primary" /> Global Pricing Settings
+                        <small className="text-muted fw-normal" style={{ fontSize: '0.75rem' }}>(Apply to ALL pincodes at once)</small>
+                    </h5>
+                    <Row className="g-3 align-items-end">
+                        <Col lg={2} md={4}>
+                            <Form.Group>
+                                <Form.Label className="x-small fw-bold text-muted">Basic Rate (₹)</Form.Label>
+                                <Form.Control size="sm" type="text" placeholder="Global Basic" value={globalRates.slag_basicrate} onChange={(e) => setGlobalRates({ ...globalRates, slag_basicrate: e.target.value })} />
+                            </Form.Group>
+                        </Col>
+                        <Col lg={2} md={4}>
+                            <Form.Group>
+                                <Form.Label className="x-small fw-bold text-muted">Transport (₹)</Form.Label>
+                                <Form.Control size="sm" type="text" placeholder="Global Transport" value={globalRates.transportation_by_truck} onChange={(e) => setGlobalRates({ ...globalRates, transportation_by_truck: e.target.value })} />
+                            </Form.Group>
+                        </Col>
+                        <Col lg={2} md={4}>
+                            <Form.Group>
+                                <Form.Label className="x-small fw-bold text-muted">Unloading (₹)</Form.Label>
+                                <Form.Control size="sm" type="text" placeholder="Global Unloading" value={globalRates.unloading_charges} onChange={(e) => setGlobalRates({ ...globalRates, unloading_charges: e.target.value })} />
+                            </Form.Group>
+                        </Col>
+                        <Col lg={2} md={4}>
+                            <Form.Group>
+                                <Form.Label className="x-small fw-bold text-muted">Per Km Rate (₹)</Form.Label>
+                                <Form.Control size="sm" type="text" placeholder="Global Km Rate" value={globalRates.per_km_rate} onChange={(e) => setGlobalRates({ ...globalRates, per_km_rate: e.target.value })} />
+                            </Form.Group>
+                        </Col>
+                        <Col lg={4} md={8}>
+                            <Button variant="dark" size="sm" onClick={handleGlobalUpdate} disabled={loading} className="w-100 py-2 fw-bold">
+                                {loading ? <Spinner animation="border" size="sm" /> : 'Apply to All & Recalculate Final Price'}
+                            </Button>
+                        </Col>
+                    </Row>
+                </Card.Body>
+            </Card>
+
+            {/* Filters Section */}
+            <div className="bg-white p-3 rounded shadow-sm border mb-4">
+                <Row className="g-3">
+                    <Col md={4}>
+                        <Form.Label className="small fw-bold text-muted">Search</Form.Label>
+                        <div className="position-relative">
+                            <Search size={16} className="position-absolute text-muted" style={{ left: '12px', top: '50%', transform: 'translateY(-50%)' }} />
+                            <Form.Control
+                                type="text"
+                                placeholder="Pincode, City, District..."
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                className="ps-5"
+                            />
+                        </div>
+                    </Col>
+                    <Col md={3}>
+                        <Form.Label className="small fw-bold text-muted">District</Form.Label>
+                        <Form.Select value={districtFilter} onChange={(e) => setDistrictFilter(e.target.value)}>
+                            <option value="All">All Districts</option>
+                            {districts.map(d => <option key={d} value={d}>{d}</option>)}
+                        </Form.Select>
+                    </Col>
+                    <Col md={3}>
+                        <Form.Label className="small fw-bold text-muted">Status</Form.Label>
+                        <Form.Select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
+                            <option value="All">All Status</option>
+                            <option value="Delivery">Delivery</option>
+                            <option value="No Delivery">No Delivery</option>
+                        </Form.Select>
+                    </Col>
+                    <Col md={2} className="d-flex align-items-end">
+                        <Button variant="outline-secondary" className="w-100" onClick={() => {
+                            setSearchTerm('');
+                            setStatusFilter('All');
+                            setDistrictFilter('All');
+                        }}>Reset</Button>
+                    </Col>
+                </Row>
             </div>
 
             {loading ? (
@@ -377,18 +589,20 @@ const Pincodes = () => {
                 </div>
             ) : (
                 <div className="bg-white rounded shadow-sm overflow-hidden border">
-                    <div className="table-responsive">
-                        <Table hover responsive className="align-middle shadow-sm rounded">
+                    <div className="table-responsive" style={{ maxHeight: '600px', overflowY: 'auto' }}>
+                        <Table hover className="align-middle mb-0" style={{ minWidth: '1200px' }}>
                             <thead className="bg-light text-secondary">
                                 <tr>
                                     <th className="border-0 font-weight-bold">City</th>
                                     <th className="border-0 font-weight-bold">Pincode</th>
-                                    <th className="border-0 font-weight-bold">Delivery Status</th>
+                                    <th className="border-0 font-weight-bold">Status</th>
                                     <th className="border-0 font-weight-bold">District</th>
-                                    <th className="border-0 font-weight-bold">Division</th>
-                                    <th className="border-0 font-weight-bold text-end">Basic Rate</th>
-                                    <th className="border-0 font-weight-bold text-end">Transport</th>
-                                    <th className="border-0 font-weight-bold text-end">Unloading</th>
+                                    <th className="border-0 font-weight-bold">Basic Rate</th>
+                                    <th className="border-0 font-weight-bold">Transport</th>
+                                    <th className="border-0 font-weight-bold">Unloading</th>
+                                    <th className="border-0 font-weight-bold">Km</th>
+                                    <th className="border-0 font-weight-bold text-end">40 Ton</th>
+                                    <th className="border-0 font-weight-bold text-end">30 Ton</th>
                                     <th className="border-0 font-weight-bold text-end">Final Price</th>
                                     <th className="border-0 font-weight-bold text-center">Active</th>
                                     <th className="border-0 font-weight-bold text-end">Actions</th>
@@ -398,23 +612,34 @@ const Pincodes = () => {
                                 {currentPincodes.length > 0 ? (
                                     currentPincodes.map((p) => (
                                         <tr key={p.id}>
-                                            <td className="fw-medium text-dark">{p.city || '-'}</td>
+                                            <td className="fw-medium text-dark">{p.city || p.City || '-'}</td>
                                             <td>
                                                 <Badge bg="light" text="dark" className="border">
-                                                    {p.pincode}
+                                                    {p.pincode || p.Pincode || p.PINCODE || '-'}
                                                 </Badge>
                                             </td>
                                             <td>
-                                                <Badge bg={p.deliverystatus === 'Delivery' ? 'success' : 'secondary'} className="text-uppercase" style={{ fontSize: '0.7rem' }}>
-                                                    {p.deliverystatus || 'N/A'}
-                                                </Badge>
+                                                {(() => {
+                                                    const status = p.delivery_status || p.deliverystatus || p['Delivery Status'] || p.Status;
+                                                    return (
+                                                        <Badge bg={status === 'Delivery' ? 'success' : 'secondary'} className="text-uppercase" style={{ fontSize: '0.7rem' }}>
+                                                            {status || 'N/A'}
+                                                        </Badge>
+                                                    );
+                                                })()}
                                             </td>
-                                            <td className="text-muted small">{p.district || '-'}</td>
-                                            <td className="text-muted small">{p.division || '-'}</td>
-                                            <td className="text-end text-muted">₹{(p.slag_basicrate || 0).toLocaleString()}</td>
-                                            <td className="text-end text-muted">₹{(p.transportation_rate || 0).toLocaleString()}</td>
-                                            <td className="text-end text-muted">₹{(p.unloading_charges || 0).toLocaleString()}</td>
-                                            <td className="text-end fw-bold text-success">₹{(p.final_price || 0).toLocaleString()}</td>
+                                            <td className="text-muted small">{p.district || p.District || '-'}</td>
+                                            <td className="text-muted">{p.slag_basicrate || p.Slag_basicrate || p['Slag Basicrate'] || p.slag_basicrate || '-'}</td>
+                                            <td className="text-muted">{p.transportation_by_truck || p.transport_rate || p.transportation_rate || p['transportation By truck'] || p['Transportation by truck'] || '-'}</td>
+                                            <td className="text-muted">{p.unloading_charges || p['Unloading charges'] || p.unloading_charges || '-'}</td>
+                                            <td className="text-muted">{p.km || p.KM || p.Km || p['Km '] || p.km || '-'}</td>
+                                            <td className="text-end text-muted">
+                                                {p.forty_ton_hydraulic || p.forty_ton_hydraulic_type || p['40 Ton hydrallic Type'] || p['40 Ton Hydraulic Type'] || p['40 Ton'] || '-'}
+                                            </td>
+                                            <td className="text-end text-muted">
+                                                {p.thirty_ton_hydraulic || p.thirty_ton_hydraulic_type || p['30 Ton hydrallic type'] || p['30 Ton Hydraulic type'] || p['30 Ton'] || '-'}
+                                            </td>
+                                            <td className="text-end fw-bold text-success">{p.final_price || p.Final_price || p['Final Price'] || p.final_price || '-'}</td>
                                             <td className="text-center">
                                                 <Form.Check
                                                     type="switch"
@@ -549,9 +774,10 @@ const Pincodes = () => {
                                         <Form.Group className="mb-3">
                                             <Form.Label className="fw-bold small">Delivery Status</Form.Label>
                                             <Form.Select
-                                                value={currentPincode.deliverystatus}
-                                                onChange={(e) => setCurrentPincode({ ...currentPincode, deliverystatus: e.target.value })}
+                                                value={currentPincode.delivery_status}
+                                                onChange={(e) => setCurrentPincode({ ...currentPincode, delivery_status: e.target.value })}
                                             >
+                                                <option value="">Select Status</option>
                                                 <option value="Delivery">Delivery</option>
                                                 <option value="No Delivery">No Delivery</option>
                                             </Form.Select>
@@ -579,21 +805,21 @@ const Pincodes = () => {
                                         <Form.Group className="mb-3">
                                             <Form.Label className="fw-bold small">Slag Basic Rate (₹)</Form.Label>
                                             <Form.Control
-                                                type="number"
-                                                placeholder="0"
+                                                type="text"
+                                                placeholder="0 or NA"
                                                 value={currentPincode.slag_basicrate}
-                                                onChange={(e) => setCurrentPincode({ ...currentPincode, slag_basicrate: e.target.value })}
+                                                onChange={(e) => updateCurrentPincodeWithAutoCalc({ slag_basicrate: e.target.value })}
                                             />
                                         </Form.Group>
                                     </Col>
                                     <Col md={6}>
                                         <Form.Group className="mb-3">
-                                            <Form.Label className="fw-bold small">Transportation Rate (₹)</Form.Label>
+                                            <Form.Label className="fw-bold small">Transport Rate (₹)</Form.Label>
                                             <Form.Control
-                                                type="number"
-                                                placeholder="0"
-                                                value={currentPincode.transportation_rate}
-                                                onChange={(e) => setCurrentPincode({ ...currentPincode, transportation_rate: e.target.value })}
+                                                type="text"
+                                                placeholder="0 or NA"
+                                                value={currentPincode.transportation_by_truck}
+                                                onChange={(e) => updateCurrentPincodeWithAutoCalc({ transportation_by_truck: e.target.value })}
                                             />
                                         </Form.Group>
                                     </Col>
@@ -604,10 +830,60 @@ const Pincodes = () => {
                                         <Form.Group className="mb-3">
                                             <Form.Label className="fw-bold small">Unloading Charges (₹)</Form.Label>
                                             <Form.Control
-                                                type="number"
-                                                placeholder="0"
+                                                type="text"
+                                                placeholder="0 or NA"
                                                 value={currentPincode.unloading_charges}
-                                                onChange={(e) => setCurrentPincode({ ...currentPincode, unloading_charges: e.target.value })}
+                                                onChange={(e) => updateCurrentPincodeWithAutoCalc({ unloading_charges: e.target.value })}
+                                            />
+                                        </Form.Group>
+                                    </Col>
+                                    <Col md={6}>
+                                        <Form.Group className="mb-3">
+                                            <Form.Label className="fw-bold small">Km</Form.Label>
+                                            <Form.Control
+                                                type="text"
+                                                placeholder="0 or NA"
+                                                value={currentPincode.km}
+                                                onChange={(e) => updateCurrentPincodeWithAutoCalc({ km: e.target.value })}
+                                            />
+                                        </Form.Group>
+                                    </Col>
+                                </Row>
+
+                                <Row>
+                                    <Col md={6}>
+                                        <Form.Group className="mb-3">
+                                            <Form.Label className="fw-bold small">Per Km Rate (₹)</Form.Label>
+                                            <Form.Control
+                                                type="text"
+                                                placeholder="0"
+                                                value={currentPincode.per_km_rate}
+                                                onChange={(e) => updateCurrentPincodeWithAutoCalc({ per_km_rate: e.target.value })}
+                                            />
+                                        </Form.Group>
+                                    </Col>
+                                    <Col md={6}>
+                                        <Form.Group className="mb-3">
+                                            <Form.Label className="fw-bold small">40 Ton Hydraulic (₹)</Form.Label>
+                                            <Form.Control
+                                                type="text"
+                                                placeholder="0 or NA"
+                                                value={currentPincode.forty_ton_hydraulic}
+                                                onChange={(e) => setCurrentPincode({ ...currentPincode, forty_ton_hydraulic: e.target.value })}
+                                            />
+                                        </Form.Group>
+                                    </Col>
+                                </Row>
+
+                                <Row>
+                                    <Col md={6}>
+                                        <Form.Group className="mb-3">
+                                            <Form.Label className="fw-bold small">30 Ton Hydraulic (₹)</Form.Label>
+                                            <Form.Control
+                                                type="text"
+                                                placeholder="0 or NA"
+                                                value={currentPincode.thirty_ton_hydraulic}
+                                                onChange={(e) => setCurrentPincode({ ...currentPincode, thirty_ton_hydraulic: e.target.value })}
                                             />
                                         </Form.Group>
                                     </Col>
@@ -615,8 +891,8 @@ const Pincodes = () => {
                                         <Form.Group className="mb-3">
                                             <Form.Label className="fw-bold small">Final Price (₹)</Form.Label>
                                             <Form.Control
-                                                type="number"
-                                                placeholder="0"
+                                                type="text"
+                                                placeholder="Auto-calculated"
                                                 value={currentPincode.final_price}
                                                 onChange={(e) => setCurrentPincode({ ...currentPincode, final_price: e.target.value })}
                                             />

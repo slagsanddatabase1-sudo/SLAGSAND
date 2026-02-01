@@ -10,7 +10,7 @@ const Orders = () => {
     const [showModal, setShowModal] = useState(false);
     const [showPincodeModal, setShowPincodeModal] = useState(false);
     const [editingPincode, setEditingPincode] = useState(null);
-    const [pincodeFormData, setPincodeFormData] = useState({ price_ton: '', price_brass: '', price_foot: '' });
+    const [pincodeFormData, setPincodeFormData] = useState({ final_price: '' });
     const [updatingPincode, setUpdatingPincode] = useState(false);
 
     useEffect(() => {
@@ -68,9 +68,7 @@ const Orders = () => {
             if (error) throw error;
             setEditingPincode(data);
             setPincodeFormData({
-                price_ton: data.price_ton,
-                price_brass: data.price_brass,
-                price_foot: data.price_foot
+                final_price: data.final_price || data.price_ton || ''
             });
             setShowPincodeModal(true);
         } catch (error) {
@@ -254,30 +252,13 @@ const Orders = () => {
                 <Modal.Body>
                     <Form onSubmit={handlePincodeSubmit}>
                         <Form.Group className="mb-3">
-                            <Form.Label>Price per Ton (₹)</Form.Label>
+                            <Form.Label>Final Price per Ton (₹)</Form.Label>
                             <Form.Control
-                                type="number"
+                                type="text"
                                 required
-                                value={pincodeFormData.price_ton}
-                                onChange={e => setPincodeFormData({ ...pincodeFormData, price_ton: e.target.value })}
-                            />
-                        </Form.Group>
-                        <Form.Group className="mb-3">
-                            <Form.Label>Price per Brass (₹)</Form.Label>
-                            <Form.Control
-                                type="number"
-                                required
-                                value={pincodeFormData.price_brass}
-                                onChange={e => setPincodeFormData({ ...pincodeFormData, price_brass: e.target.value })}
-                            />
-                        </Form.Group>
-                        <Form.Group className="mb-3">
-                            <Form.Label>Price per Foot (₹)</Form.Label>
-                            <Form.Control
-                                type="number"
-                                required
-                                value={pincodeFormData.price_foot}
-                                onChange={e => setPincodeFormData({ ...pincodeFormData, price_foot: e.target.value })}
+                                placeholder="Enter price or NA"
+                                value={pincodeFormData.final_price}
+                                onChange={e => setPincodeFormData({ final_price: e.target.value })}
                             />
                         </Form.Group>
                         <Button type="submit" variant="primary" className="w-100" disabled={updatingPincode}>
