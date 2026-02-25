@@ -3,6 +3,7 @@ import { Outlet, Link, useNavigate, useLocation } from 'react-router-dom';
 import { Container, Nav, Navbar, Button, Spinner, Dropdown, Badge } from 'react-bootstrap';
 import { supabase } from '../../lib/supabase';
 import { LayoutDashboard, ShoppingBag, MapPin, Users, HelpCircle, MessageSquare, LogOut, Star, Menu, Bell, Search, Hash, ChevronLeft } from 'lucide-react';
+import NotificationDropdown from '../../components/Admin/NotificationDropdown';
 
 const AdminLayout = () => {
     const [loading, setLoading] = useState(true);
@@ -144,7 +145,6 @@ const AdminLayout = () => {
                 className="flex-grow-1 d-flex flex-column transition-margin"
                 style={{
                     marginLeft: desktopSidebarOpen ? '260px' : '0',
-                    marginLeft: desktopSidebarOpen ? '260px' : '0',
                     transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
                 }}
             >
@@ -171,10 +171,7 @@ const AdminLayout = () => {
                                 <input type="text" className="border-0 bg-transparent small focus-ring-none" placeholder="Search..." style={{ outline: 'none', width: '150px' }} />
                             </div>
 
-                            <Button variant="light" className="rounded-circle p-2 position-relative text-secondary">
-                                <Bell size={20} />
-                                <span className="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle"></span>
-                            </Button>
+                            <NotificationDropdown />
 
                             <div className="vr mx-2 h-50 my-auto text-muted"></div>                            <Dropdown align="end">
                                 <Dropdown.Toggle variant="white" className="d-flex align-items-center border-0 p-0 text-dark after-none">
@@ -187,9 +184,6 @@ const AdminLayout = () => {
                                     </div>
                                 </Dropdown.Toggle>
                                 <Dropdown.Menu className="shadow border-0 mt-2 rounded-3 p-2" style={{ minWidth: '200px' }}>
-                                    <Dropdown.Item href="#" className="rounded-2 mb-1">Profile</Dropdown.Item>
-                                    <Dropdown.Item href="#" className="rounded-2 mb-1">Settings</Dropdown.Item>
-                                    <Dropdown.Divider />
                                     <Dropdown.Item onClick={handleLogout} className="text-danger rounded-2 d-flex align-items-center">
                                         <LogOut size={16} className="me-2" /> Sign Out
                                     </Dropdown.Item>

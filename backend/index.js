@@ -1,15 +1,28 @@
 const express = require("express");
-const Razorpay = require("razorpay");
 const cors = require("cors");
-const crypto = require("crypto");
+const Razorpay = require("razorpay");
 const path = require("path");
-
+const crypto = require("crypto");
+const { createClient } = require("@supabase/supabase-js");
 require("dotenv").config({ path: "../.env" });
+
+// Initialize Supabase Admin Client
+const supabaseAdmin = createClient(
+    process.env.VITE_SUPABASE_URL,
+    process.env.SUPABASE_SERVICE_ROLE_KEY,
+    {
+        auth: {
+            autoRefreshToken: false,
+            persistSession: false
+        }
+    }
+);
 
 // Log environment variables status (without exposing secrets)
 console.log("🔧 Environment Variables Check:");
 console.log("✓ RAZORPAY_KEY_ID:", process.env.RAZORPAY_KEY_ID ? `${process.env.RAZORPAY_KEY_ID.substring(0, 8)}...` : "❌ MISSING");
 console.log("✓ RAZORPAY_KEY_SECRET:", process.env.RAZORPAY_KEY_SECRET ? "✓ Present" : "❌ MISSING");
+console.log("✓ SUPABASE_SERVICE_ROLE_KEY:", process.env.SUPABASE_SERVICE_ROLE_KEY ? "✓ Present" : "❌ MISSING");
 console.log("✓ PORT:", process.env.PORT || 5000);
 
 const app = express();
@@ -131,6 +144,46 @@ app.use(express.static(path.join(__dirname, "../dist")));
 
 // Handle SPA routing - serve index.html for any unknown routes
 // Using app.use() fallback to avoid Express 5 path-to-regexp wildcard syntax issues
+
+// Admin User Creation Endpoint (Bypass Rate Limits)
+app.post("/api/admin/create-user", async (req, res) => {
+    const { email, password, role } = req.body;
+
+    if (!email || !password || !role) {
+        return res.status(400).json({ error: "Email, password, and role are required" });
+    }
+
+    try {
+        console.log(`👤 Admin creating user: ${email} with role: ${role}`);
+
+        // 1. Create user in Supabase Auth using Admin API
+        const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({
+            email,
+            password,
+            email_confirm: true // Auto-confirm so users can log in immediately
+        });
+
+        if (authError) throw authError;
+
+        // 2. Insert role into user_roles table
+        const { error: dbError } = await supabaseAdmin
+            .from('user_roles')
+            .upsert({
+                id: authData.user.id, // Use the actual Auth ID
+                email,
+                role,
+                status: 'active'
+            }, { onConflict: 'email' });
+
+        if (dbError) throw dbError;
+
+        res.json({ message: "User created successfully", user: authData.user });
+    } catch (err) {
+        console.error("❌ Error creating admin user:", err.message);
+        res.status(500).json({ error: err.message });
+    }
+});
+
 app.use((req, res) => {
     // If it's an API request that wasn't handled, return 404
     if (req.path.startsWith('/api')) {

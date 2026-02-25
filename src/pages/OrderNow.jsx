@@ -75,8 +75,20 @@ const OrderNow = () => {
                         return;
                     }
 
-                    // Use final_price as the unit price per Ton
-                    unitPrice = parseFloat(pincodeData.final_price || pincodeData.price_ton || pincodeData.slag_basicrate) || 0;
+                    // Calculate Unit Price based on Quantity
+                    const basic = parseFloat(pincodeData.slag_basicrate) || 0;
+                    const transport = parseFloat(pincodeData.transportation_by_truck || pincodeData.transport_rate || pincodeData['transportation By truck'] || pincodeData['Transportation by truck']) || 0;
+                    const unloading = parseFloat(pincodeData.unloading_charges) || 0;
+                    const fortyVal = parseFloat(pincodeData.forty_ton_hydraulic || pincodeData.forty_ton_hydraulic_type || pincodeData['40 Ton hydrallic Type'] || pincodeData['40 Ton']) || 0;
+                    const thirtyVal = parseFloat(pincodeData.thirty_ton_hydraulic || pincodeData.thirty_ton_hydraulic_type || pincodeData['30 Ton hydrallic type'] || pincodeData['30 Ton']) || 0;
+
+                    if (quantity === '40' && fortyVal > 0) {
+                        unitPrice = basic + fortyVal;
+                    } else if (quantity === '30' && thirtyVal > 0) {
+                        unitPrice = basic + thirtyVal;
+                    } else {
+                        unitPrice = basic + transport + unloading;
+                    }
 
                     // Auto-fill City from DB
                     if (pincodeData.city) {

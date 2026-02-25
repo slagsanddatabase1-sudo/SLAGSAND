@@ -3,34 +3,22 @@ import React, { useState, useEffect } from 'react';
 import { Container, Button, Alert, Table, Badge, Modal, Form, Spinner } from 'react-bootstrap';
 import { Plus, Trash2, Mail, Shield, Edit, Eye, EyeOff } from 'lucide-react';
 import { createClient } from '@supabase/supabase-js';
+import { useOutletContext } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
 
 const UserManagement = () => {
+    const { userRole } = useOutletContext();
     const [users, setUsers] = useState([]);
     const [loading, setLoading] = useState(true);
     const [showModal, setShowModal] = useState(false);
     const [formData, setFormData] = useState({ email: '', password: '', role: 'executive' });
     const [inviting, setInviting] = useState(false);
     const [message, setMessage] = useState(null);
-    const [currentUserRole, setCurrentUserRole] = useState(null);
     const [showPassword, setShowPassword] = useState(false);
 
     useEffect(() => {
-        checkAdminAccess();
         fetchUsers();
     }, []);
-
-    const checkAdminAccess = async () => {
-        const { data: { user } } = await supabase.auth.getUser();
-        if (user) {
-            const { data } = await supabase.from('user_roles').select('role').eq('email', user.email).single();
-            if (data && data.role === 'admin') {
-                setCurrentUserRole('admin');
-            } else {
-                setCurrentUserRole(data?.role || 'staff');
-            }
-        }
-    };
 
     const fetchUsers = async () => {
         try {
@@ -84,34 +72,23 @@ const UserManagement = () => {
         setInviting(true);
         setMessage(null);
         try {
-            // 1. Create User in Supabase Auth (Secondary Client)
-            const tempSupabase = createClient(
-                import.meta.env.VITE_SUPABASE_URL,
-                import.meta.env.VITE_SUPABASE_ANON_KEY,
-                { auth: { persistSession: false } }
-            );
-
-            const { data: authData, error: authError } = await tempSupabase.auth.signUp({
-                email: formData.email,
-                password: formData.password,
+            const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
+            const response = await fetch(`${baseUrl}/api/admin/create-user`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    email: formData.email,
+                    password: formData.password,
+                    role: formData.role
+                })
             });
 
-            if (authError) throw authError;
+            const data = await response.json();
 
-            // 2. Insert into user_roles table
-            // We use the main client (Admin) to insert into the table
-            const { error: dbError } = await supabase.from('user_roles').insert([
-                {
-                    email: formData.email,
-                    role: formData.role,
-                    status: 'active' // Auto-activate
-                }
-            ]);
-
-            if (dbError) {
-                // If duplicate email in user_roles, maybe just update it?
-                // For now, throw error
-                throw dbError;
+            if (!response.ok) {
+                throw new Error(data.error || 'Failed to create user');
             }
 
             setMessage({
@@ -130,8 +107,24 @@ const UserManagement = () => {
         }
     };
 
+    const handleUpdateRole = async (email, newRole) => {
+        try {
+            const { error } = await supabase
+                .from('user_roles')
+                .update({ role: newRole })
+                .eq('email', email);
+
+            if (error) throw error;
+
+            setMessage({ type: 'success', text: `Role updated for ${email} to ${newRole.toUpperCase()}` });
+            fetchUsers();
+        } catch (error) {
+            setMessage({ type: 'danger', text: error.message });
+        }
+    };
+
     if (loading) return <Spinner animation="border" />;
-    if (currentUserRole !== 'admin') return <Container className="p-5 text-center"><h3>Access Denied</h3><p>Please log in to manage users.</p></Container>;
+    if (userRole !== 'admin') return <Container className="p-5 text-center"><h3>Access Denied</h3><p>Please log in to manage users.</p></Container>;
 
     return (
         <Container fluid>
@@ -169,12 +162,17 @@ const UserManagement = () => {
                                                 </div>
                                             </td>
                                             <td>
-                                                <Badge bg={
-                                                    user.role === 'admin' ? 'danger' :
-                                                        user.role === 'executive' ? 'primary' : 'info'
-                                                } className="text-uppercase px-3 py-2">
-                                                    {user.role}
-                                                </Badge>
+                                                <Form.Select
+                                                    size="sm"
+                                                    value={user.role}
+                                                    onChange={(e) => handleUpdateRole(user.email, e.target.value)}
+                                                    className="w-auto border-0 bg-light fw-bold text-uppercase px-3 py-2 cursor-pointer"
+                                                    style={{ fontSize: '0.75rem' }}
+                                                >
+                                                    <option value="admin">Admin</option>
+                                                    <option value="executive">Executive</option>
+                                                    <option value="staff">Staff</option>
+                                                </Form.Select>
                                             </td>
                                             <td>
                                                 <Badge bg="success" className="bg-opacity-10 text-success px-3 py-2 rounded-pill">

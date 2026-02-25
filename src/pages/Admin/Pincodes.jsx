@@ -14,10 +14,9 @@ const Pincodes = () => {
     const [statusFilter, setStatusFilter] = useState('All');
     const [districtFilter, setDistrictFilter] = useState('All');
     const [globalRates, setGlobalRates] = useState({
-        slag_basicrate: '',
-        transportation_by_truck: '',
-        unloading_charges: '',
-        per_km_rate: ''
+        slag_basicrate: '900',
+        transportation_by_truck: '400',
+        unloading_charges: '560'
     });
     const [districts, setDistricts] = useState([]);
 
@@ -44,7 +43,6 @@ const Pincodes = () => {
             if (globalRates.slag_basicrate) updateData.slag_basicrate = globalRates.slag_basicrate;
             if (globalRates.transportation_by_truck) updateData.transportation_by_truck = globalRates.transportation_by_truck;
             if (globalRates.unloading_charges) updateData.unloading_charges = globalRates.unloading_charges;
-            if (globalRates.per_km_rate) updateData.per_km_rate = globalRates.per_km_rate;
 
             if (Object.keys(updateData).length === 0) {
                 alert('Please enter at least one value to update');
@@ -70,9 +68,7 @@ const Pincodes = () => {
                 const basic = parseFloat(p.slag_basicrate) || 0;
                 const transport = parseFloat(p.transportation_by_truck) || 0;
                 const unloading = parseFloat(p.unloading_charges) || 0;
-                const km = parseFloat(p.km) || 0;
-                const kmRate = parseFloat(p.per_km_rate) || 0;
-                const final = basic + transport + unloading + (km * kmRate);
+                const final = basic + transport + unloading;
 
                 await supabase.from('pincodes').update({ final_price: final.toFixed(2).toString() }).eq('id', p.id);
             }
@@ -90,14 +86,12 @@ const Pincodes = () => {
     const updateCurrentPincodeWithAutoCalc = (updates) => {
         const next = { ...currentPincode, ...updates };
 
-        // Auto Calc Formula: Final = Basic + Transport + Unloading + (Km * Per Km Rate)
+        // Auto Calc Formula: Final = Basic + Transport + Unloading
         const basic = parseFloat(next.slag_basicrate) || 0;
         const transport = parseFloat(next.transportation_by_truck) || 0;
         const unloading = parseFloat(next.unloading_charges) || 0;
-        const km = parseFloat(next.km) || 0;
-        const kmRate = parseFloat(next.per_km_rate) || 0;
 
-        const final = basic + transport + unloading + (km * kmRate);
+        const final = basic + transport + unloading;
         next.final_price = final > 0 ? final.toFixed(2) : next.final_price;
 
         setCurrentPincode(next);
@@ -119,7 +113,6 @@ const Pincodes = () => {
         km: '',
         forty_ton_hydraulic: '',
         thirty_ton_hydraulic: '',
-        per_km_rate: '0',
         final_price: '',
         is_active: true
     });
@@ -232,7 +225,6 @@ const Pincodes = () => {
                 km: pincode.km || pincode['Km '] || '',
                 forty_ton_hydraulic: pincode.forty_ton_hydraulic || pincode.forty_ton_hydraulic_type || pincode['40 Ton hydrallic Type'] || '',
                 thirty_ton_hydraulic: pincode.thirty_ton_hydraulic || pincode.thirty_ton_hydraulic_type || pincode['30 Ton hydrallic type'] || '',
-                per_km_rate: pincode.per_km_rate || '0',
                 final_price: pincode.final_price || ''
             });
         } else {
@@ -250,7 +242,6 @@ const Pincodes = () => {
                 km: '',
                 forty_ton_hydraulic: '',
                 thirty_ton_hydraulic: '',
-                per_km_rate: globalRates.per_km_rate || '0',
                 final_price: '',
                 is_active: true
             });
@@ -278,7 +269,6 @@ const Pincodes = () => {
                 km: currentPincode.km?.toString() || null,
                 forty_ton_hydraulic: currentPincode.forty_ton_hydraulic?.toString() || null,
                 thirty_ton_hydraulic: currentPincode.thirty_ton_hydraulic?.toString() || null,
-                per_km_rate: currentPincode.per_km_rate?.toString() || '0',
                 final_price: currentPincode.final_price?.toString() || null,
                 is_active: currentPincode.is_active
             };
@@ -527,15 +517,9 @@ const Pincodes = () => {
                                 <Form.Control size="sm" type="text" placeholder="Global Unloading" value={globalRates.unloading_charges} onChange={(e) => setGlobalRates({ ...globalRates, unloading_charges: e.target.value })} />
                             </Form.Group>
                         </Col>
-                        <Col lg={2} md={4}>
-                            <Form.Group>
-                                <Form.Label className="x-small fw-bold text-muted">Per Km Rate (₹)</Form.Label>
-                                <Form.Control size="sm" type="text" placeholder="Global Km Rate" value={globalRates.per_km_rate} onChange={(e) => setGlobalRates({ ...globalRates, per_km_rate: e.target.value })} />
-                            </Form.Group>
-                        </Col>
-                        <Col lg={4} md={8}>
+                        <Col lg={6} md={8}>
                             <Button variant="dark" size="sm" onClick={handleGlobalUpdate} disabled={loading} className="w-100 py-2 fw-bold">
-                                {loading ? <Spinner animation="border" size="sm" /> : 'Apply to All & Recalculate Final Price'}
+                                {loading ? <Spinner animation="border" size="sm" /> : 'Apply to All (Basic, Transport, Unloading) & Recalculate Final Price'}
                             </Button>
                         </Col>
                     </Row>
@@ -634,12 +618,27 @@ const Pincodes = () => {
                                             <td className="text-muted">{p.unloading_charges || p['Unloading charges'] || p.unloading_charges || '-'}</td>
                                             <td className="text-muted">{p.km || p.KM || p.Km || p['Km '] || p.km || '-'}</td>
                                             <td className="text-end text-muted">
-                                                {p.forty_ton_hydraulic || p.forty_ton_hydraulic_type || p['40 Ton hydrallic Type'] || p['40 Ton Hydraulic Type'] || p['40 Ton'] || '-'}
+                                                {(() => {
+                                                    const basic = parseFloat(p.slag_basicrate) || 0;
+                                                    const val = parseFloat(p.forty_ton_hydraulic || p.forty_ton_hydraulic_type || p['40 Ton hydrallic Type'] || p['40 Ton Hydraulic Type'] || p['40 Ton']) || 0;
+                                                    return val > 0 ? (basic + val).toFixed(2) : '-';
+                                                })()}
                                             </td>
                                             <td className="text-end text-muted">
-                                                {p.thirty_ton_hydraulic || p.thirty_ton_hydraulic_type || p['30 Ton hydrallic type'] || p['30 Ton Hydraulic type'] || p['30 Ton'] || '-'}
+                                                {(() => {
+                                                    const basic = parseFloat(p.slag_basicrate) || 0;
+                                                    const val = parseFloat(p.thirty_ton_hydraulic || p.thirty_ton_hydraulic_type || p['30 Ton hydrallic type'] || p['30 Ton Hydraulic type'] || p['30 Ton']) || 0;
+                                                    return val > 0 ? (basic + val).toFixed(2) : '-';
+                                                })()}
                                             </td>
-                                            <td className="text-end fw-bold text-success">{p.final_price || p.Final_price || p['Final Price'] || p.final_price || '-'}</td>
+                                            <td className="text-end fw-bold text-success">
+                                                {(() => {
+                                                    const basic = parseFloat(p.slag_basicrate) || 0;
+                                                    const transport = parseFloat(p.transportation_by_truck || p.transport_rate || p.transportation_rate || p['transportation By truck'] || p['Transportation by truck']) || 0;
+                                                    const unloading = parseFloat(p.unloading_charges || p['Unloading charges'] || p.unloading_charges) || 0;
+                                                    return (basic + transport + unloading).toFixed(2);
+                                                })()}
+                                            </td>
                                             <td className="text-center">
                                                 <Form.Check
                                                     type="switch"
@@ -853,17 +852,6 @@ const Pincodes = () => {
                                 <Row>
                                     <Col md={6}>
                                         <Form.Group className="mb-3">
-                                            <Form.Label className="fw-bold small">Per Km Rate (₹)</Form.Label>
-                                            <Form.Control
-                                                type="text"
-                                                placeholder="0"
-                                                value={currentPincode.per_km_rate}
-                                                onChange={(e) => updateCurrentPincodeWithAutoCalc({ per_km_rate: e.target.value })}
-                                            />
-                                        </Form.Group>
-                                    </Col>
-                                    <Col md={6}>
-                                        <Form.Group className="mb-3">
                                             <Form.Label className="fw-bold small">40 Ton Hydraulic (₹)</Form.Label>
                                             <Form.Control
                                                 type="text"
@@ -873,9 +861,6 @@ const Pincodes = () => {
                                             />
                                         </Form.Group>
                                     </Col>
-                                </Row>
-
-                                <Row>
                                     <Col md={6}>
                                         <Form.Group className="mb-3">
                                             <Form.Label className="fw-bold small">30 Ton Hydraulic (₹)</Form.Label>
@@ -887,7 +872,10 @@ const Pincodes = () => {
                                             />
                                         </Form.Group>
                                     </Col>
-                                    <Col md={6}>
+                                </Row>
+
+                                <Row>
+                                    <Col md={12}>
                                         <Form.Group className="mb-3">
                                             <Form.Label className="fw-bold small">Final Price (₹)</Form.Label>
                                             <Form.Control
