@@ -24,7 +24,7 @@ const FloatingChat = () => {
 
     const handleWhatsAppClick = () => {
         // Replace with actual number
-        window.open('https://wa.me/911234567890', '_blank');
+        window.open('https://wa.me/9421008649', '_blank');
     };
 
     const toggleChat = () => {
