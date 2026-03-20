@@ -4,7 +4,7 @@ const Razorpay = require("razorpay");
 const path = require("path");
 const crypto = require("crypto");
 const { createClient } = require("@supabase/supabase-js");
-require("dotenv").config({ path: "../.env" });
+require("dotenv").config();
 
 // Initialize Supabase Admin Client
 const supabaseAdmin = createClient(
