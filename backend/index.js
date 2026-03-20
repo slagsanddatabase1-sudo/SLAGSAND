@@ -28,15 +28,17 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
+const allowedOriginPattern = /^https:\/\/.*\.vercel\.app$/;
 const allowedOrigins = [
-    "https://slagsand.vercel.app",
     "http://localhost:5173",
     "http://localhost:4173"
 ];
 app.use(cors({
     origin: (origin, callback) => {
-        // allow requests with no origin (e.g. Postman, curl)
-        if (!origin || allowedOrigins.includes(origin)) {
+        // Allow requests with no origin (e.g. Postman, curl, Render health checks)
+        if (!origin) return callback(null, true);
+        // Allow any *.vercel.app subdomain or explicit localhost origins
+        if (allowedOriginPattern.test(origin) || allowedOrigins.includes(origin)) {
             callback(null, true);
         } else {
             callback(new Error(`CORS blocked for origin: ${origin}`));
