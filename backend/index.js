@@ -1,7 +1,6 @@
 const express = require("express");
 const cors = require("cors");
 const Razorpay = require("razorpay");
-const path = require("path");
 const crypto = require("crypto");
 const { createClient } = require("@supabase/supabase-js");
 require("dotenv").config();
@@ -28,7 +27,23 @@ console.log("✓ PORT:", process.env.PORT || 5000);
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
-app.use(cors());
+
+const allowedOrigins = [
+    "https://slagsand.vercel.app",
+    "http://localhost:5173",
+    "http://localhost:4173"
+];
+app.use(cors({
+    origin: (origin, callback) => {
+        // allow requests with no origin (e.g. Postman, curl)
+        if (!origin || allowedOrigins.includes(origin)) {
+            callback(null, true);
+        } else {
+            callback(new Error(`CORS blocked for origin: ${origin}`));
+        }
+    },
+    credentials: true
+}));
 
 // Initialize Razorpay once
 const razorpay = new Razorpay({
@@ -139,8 +154,7 @@ app.post("/api/order", async (req, res) => {
     }
 })
 
-// Serve static files from the dist directory
-app.use(express.static(path.join(__dirname, "../dist")));
+// NOTE: Static files are served by Vercel — no static serving here.
 
 // Handle SPA routing - serve index.html for any unknown routes
 // Using app.use() fallback to avoid Express 5 path-to-regexp wildcard syntax issues
@@ -185,12 +199,7 @@ app.post("/api/admin/create-user", async (req, res) => {
 });
 
 app.use((req, res) => {
-    // If it's an API request that wasn't handled, return 404
-    if (req.path.startsWith('/api')) {
-        return res.status(404).json({ error: "API endpoint not found" });
-    }
-    // Otherwise serve index.html for React routing
-    res.sendFile(path.join(__dirname, "../dist/index.html"));
+    res.status(404).json({ error: "API endpoint not found" });
 });
 
 const PORT = process.env.PORT || 5000;
