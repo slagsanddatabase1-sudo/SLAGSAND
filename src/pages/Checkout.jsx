@@ -81,7 +81,7 @@ const Checkout = () => {
             };
             console.log("Order payload:", orderPayload);
 
-            const baseURL = import.meta.env.VITE_API_BASE_URL || '';
+            const baseURL = import.meta.env.VITE_API_BASE_URL || 'https://slagsand.onrender.com';
             const response = await fetch(`${baseURL}/api/order`, {
                 method: 'POST',
                 headers: {
@@ -114,7 +114,7 @@ const Checkout = () => {
                     console.log("✓ Payment successful, validating...");
                     console.log("Payment response:", response);
 
-                    const baseURL = import.meta.env.VITE_API_BASE_URL || '';
+                    const baseURL = import.meta.env.VITE_API_BASE_URL || 'https://slagsand.onrender.com';
                     // On Success, validate signature
                     const validateRes = await fetch(`${baseURL}/api/validate`, {
                         method: 'POST',
