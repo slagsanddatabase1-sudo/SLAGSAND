@@ -3,7 +3,7 @@ import { Container, Row, Col, Form, Button, Card, Alert, Spinner, Modal } from '
 import { useForm } from 'react-hook-form';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
-import { CreditCard, ShoppingCart, ShieldCheck, Banknote, Check } from 'lucide-react';
+import { CreditCard, ShoppingCart, ShieldCheck, Banknote, Check, MapPin } from 'lucide-react';
 import { motion } from 'framer-motion';
 import RevealOnScroll from '../components/RevealOnScroll';
 
@@ -254,6 +254,17 @@ const OrderNow = () => {
                     <RevealOnScroll direction="down">
                         <h1 className="display-4 fw-bold text-white mb-2">Order Eco Sand</h1>
                         <p className="text-white-50 lead">Premium quality slag sand delivered straight to your site.</p>
+                        
+                        <div className="mt-4 pt-3 border-top border-white border-opacity-10 d-inline-block" style={{ maxWidth: '800px' }}>
+                            <p className="text-white-50 small text-uppercase fw-bold mb-3" style={{ letterSpacing: '1px' }}>We Supply Slag Sand In</p>
+                            <div className="d-flex flex-wrap justify-content-center gap-2">
+                                {['Nagpur', 'Wardha', 'Amravati', 'Yavatmal', 'Akola', 'Chandrapur'].map(city => (
+                                    <span key={city} className="badge bg-white bg-opacity-10 text-white px-3 py-2 rounded-pill fw-normal shadow-sm" style={{ backdropFilter: 'blur(5px)', border: '1px solid rgba(255,255,255,0.05)' }}>
+                                        <MapPin size={12} className="me-1 d-inline-block" style={{ marginTop: '-2px' }} /> {city}
+                                    </span>
+                                ))}
+                            </div>
+                        </div>
                     </RevealOnScroll>
                 </Container>
                 {/* Decorative background element */}

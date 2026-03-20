@@ -139,6 +139,13 @@ const FloatingChat = () => {
                         padding-right: 1rem !important; /* Adjust horizontal spacing if needed */
                     }
                 }
+                @keyframes bounceHorizontal {
+                    0%, 100% { transform: translateX(0); }
+                    50% { transform: translateX(-8px); }
+                }
+                .whatsapp-bubble {
+                    animation: bounceHorizontal 2s infinite ease-in-out;
+                }
             `}
             </style>
             <div className="position-fixed p-4 d-flex flex-column gap-3 align-items-end floating-chat-container" style={{ zIndex: 1000, pointerEvents: 'none' }}>
@@ -226,16 +233,46 @@ const FloatingChat = () => {
                 >
                     {isOpen ? <X size={32} /> : <ChatText size={32} />}
                 </Button>
-                {/* WhatsApp Button */}
-                <Button
-                    variant="success"
-                    className="rounded-circle p-3 d-flex align-items-center justify-content-center shadow-lg"
-                    style={{ width: '60px', height: '60px', transition: 'transform 0.2s', pointerEvents: 'auto' }}
-                    onClick={handleWhatsAppClick}
-                    title="Chat on WhatsApp"
-                >
-                    <Whatsapp size={32} />
-                </Button>
+                {/* WhatsApp Button Wrapper */}
+                <div className="position-relative d-flex align-items-center">
+                    {/* Floating Message Bubble */}
+                    <div 
+                        className="bg-white shadow-lg px-3 py-2 rounded-4 me-3 text-dark fw-bold position-absolute whatsapp-bubble"
+                        style={{
+                            right: '100%',
+                            whiteSpace: 'nowrap',
+                            fontSize: '0.9rem',
+                            border: '1px solid #e2e8f0',
+                            pointerEvents: 'auto',
+                            cursor: 'pointer'
+                        }}
+                        onClick={handleWhatsAppClick}
+                    >
+                        Buy on WhatsApp!
+                        {/* Little triangle pointer (hidden on very small screens if it overflows, or just let it be) */}
+                        <div 
+                            className="position-absolute bg-white border-end border-bottom"
+                            style={{
+                                width: '10px', height: '10px',
+                                right: '-5.5px', top: '50%',
+                                transform: 'translateY(-50%) rotate(-45deg)',
+                                borderRightColor: '#e2e8f0',
+                                borderBottomColor: '#e2e8f0',
+                                borderTop: 'none', borderLeft: 'none'
+                            }}
+                        ></div>
+                    </div>
+
+                    <Button
+                        variant="success"
+                        className="rounded-circle p-3 d-flex align-items-center justify-content-center shadow-lg"
+                        style={{ width: '60px', height: '60px', transition: 'transform 0.2s', pointerEvents: 'auto' }}
+                        onClick={handleWhatsAppClick}
+                        title="Chat on WhatsApp"
+                    >
+                        <Whatsapp size={32} />
+                    </Button>
+                </div>
             </div>
         </>
     );

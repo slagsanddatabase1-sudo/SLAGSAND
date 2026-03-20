@@ -651,6 +651,69 @@ const Home = () => {
                     </Row>
                 </Container>
             </section>
+
+            {/* 7. Gallery Section */}
+            <section className="py-5" style={{ backgroundColor: '#F9F9F8' }}>
+                <Container>
+                    <RevealOnScroll direction="up">
+                        <div className="text-center mb-5">
+                            <h2 className="fw-bold display-5 mb-3" style={{ color: "#0f172a" }}>Our Gallery</h2>
+                            <p className="text-secondary fs-5">A glimpse into our high-quality materials and processes.</p>
+                        </div>
+                        <Row className="g-3">
+                            <Col md={6}>
+                                <div className="overflow-hidden rounded-4 shadow-sm h-100" style={{ cursor: 'pointer' }}>
+                                    <img src="/assets/gallery/1.jpeg" alt="Gallery 1" className="img-fluid w-100 h-100" style={{ objectFit: 'cover', minHeight: '350px', transition: 'transform 0.4s ease' }} onMouseOver={e => e.currentTarget.style.transform = 'scale(1.07)'} onMouseOut={e => e.currentTarget.style.transform = 'scale(1)'} />
+                                </div>
+                            </Col>
+                            <Col md={6}>
+                                <Row className="g-3 h-100">
+                                    <Col sm={6}>
+                                        <div className="overflow-hidden rounded-4 shadow-sm h-100" style={{ cursor: 'pointer' }}>
+                                            <img src="/assets/gallery/2.jpeg" alt="Gallery 2" className="img-fluid w-100 h-100" style={{ objectFit: 'cover', minHeight: '167px', transition: 'transform 0.4s ease' }} onMouseOver={e => e.currentTarget.style.transform = 'scale(1.07)'} onMouseOut={e => e.currentTarget.style.transform = 'scale(1)'} />
+                                        </div>
+                                    </Col>
+                                    <Col sm={6}>
+                                        <div className="overflow-hidden rounded-4 shadow-sm h-100" style={{ cursor: 'pointer' }}>
+                                            <img src="/assets/gallery/3.jpeg" alt="Gallery 3" className="img-fluid w-100 h-100" style={{ objectFit: 'cover', minHeight: '167px', transition: 'transform 0.4s ease' }} onMouseOver={e => e.currentTarget.style.transform = 'scale(1.07)'} onMouseOut={e => e.currentTarget.style.transform = 'scale(1)'} />
+                                        </div>
+                                    </Col>
+                                    <Col sm={6}>
+                                        <div className="overflow-hidden rounded-4 shadow-sm h-100" style={{ cursor: 'pointer' }}>
+                                            <img src="/assets/gallery/4.jpeg" alt="Gallery 4" className="img-fluid w-100 h-100" style={{ objectFit: 'cover', minHeight: '167px', transition: 'transform 0.4s ease' }} onMouseOver={e => e.currentTarget.style.transform = 'scale(1.07)'} onMouseOut={e => e.currentTarget.style.transform = 'scale(1)'} />
+                                        </div>
+                                    </Col>
+                                    <Col sm={6}>
+                                        <div className="overflow-hidden rounded-4 shadow-sm h-100" style={{ cursor: 'pointer' }}>
+                                            <img src="/assets/gallery/5.jpeg" alt="Gallery 5" className="img-fluid w-100 h-100" style={{ objectFit: 'cover', minHeight: '167px', transition: 'transform 0.4s ease' }} onMouseOver={e => e.currentTarget.style.transform = 'scale(1.07)'} onMouseOut={e => e.currentTarget.style.transform = 'scale(1)'} />
+                                        </div>
+                                    </Col>
+                                </Row>
+                            </Col>
+                            <Col md={3} sm={6}>
+                                <div className="overflow-hidden rounded-4 shadow-sm h-100" style={{ cursor: 'pointer' }}>
+                                    <img src="/assets/gallery/6.jpeg" alt="Gallery 6" className="img-fluid w-100 h-100" style={{ objectFit: 'cover', minHeight: '200px', transition: 'transform 0.4s ease' }} onMouseOver={e => e.currentTarget.style.transform = 'scale(1.07)'} onMouseOut={e => e.currentTarget.style.transform = 'scale(1)'} />
+                                </div>
+                            </Col>
+                            <Col md={3} sm={6}>
+                                <div className="overflow-hidden rounded-4 shadow-sm h-100" style={{ cursor: 'pointer' }}>
+                                    <img src="/assets/gallery/7.jpeg" alt="Gallery 7" className="img-fluid w-100 h-100" style={{ objectFit: 'cover', minHeight: '200px', transition: 'transform 0.4s ease' }} onMouseOver={e => e.currentTarget.style.transform = 'scale(1.07)'} onMouseOut={e => e.currentTarget.style.transform = 'scale(1)'} />
+                                </div>
+                            </Col>
+                            <Col md={3} sm={6}>
+                                <div className="overflow-hidden rounded-4 shadow-sm h-100" style={{ cursor: 'pointer' }}>
+                                    <img src="/assets/gallery/8.jpeg" alt="Gallery 8" className="img-fluid w-100 h-100" style={{ objectFit: 'cover', minHeight: '200px', transition: 'transform 0.4s ease' }} onMouseOver={e => e.currentTarget.style.transform = 'scale(1.07)'} onMouseOut={e => e.currentTarget.style.transform = 'scale(1)'} />
+                                </div>
+                            </Col>
+                            <Col md={3} sm={6}>
+                                <div className="overflow-hidden rounded-4 shadow-sm h-100" style={{ cursor: 'pointer' }}>
+                                    <img src="/assets/gallery/9.jpeg" alt="Gallery 9" className="img-fluid w-100 h-100" style={{ objectFit: 'cover', minHeight: '200px', transition: 'transform 0.4s ease' }} onMouseOver={e => e.currentTarget.style.transform = 'scale(1.07)'} onMouseOut={e => e.currentTarget.style.transform = 'scale(1)'} />
+                                </div>
+                            </Col>
+                        </Row>
+                    </RevealOnScroll>
+                </Container>
+            </section>
             {/* 5. Our Achievements */}
             <section
                 className="position-relative d-flex flex-column justify-content-center"
@@ -843,6 +906,8 @@ const Home = () => {
                     );
                 })()}
             </section>
+
+            
 
             <FloatingChat />
             {/* Order Sample Modal (Updated) */}

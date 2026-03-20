@@ -91,12 +91,24 @@ const Contact = () => {
                                     </div>
                                 </div>
 
-                                <div className="mt-5">
-                                    <h6 className="mb-3 fw-bold">Follow Us</h6>
-                                    <div className="d-flex gap-2">
-                                        <Button variant="outline-light" className="rounded-circle p-2 border-opacity-25" style={{ width: '40px', height: '40px' }} href="https://facebook.com" target="_blank"><Facebook size={18} /></Button>
-                                        <Button variant="outline-light" className="rounded-circle p-2 border-opacity-25" style={{ width: '40px', height: '40px' }} href="https://instagram.com" target="_blank"><Instagram size={18} /></Button>
-                                        <Button variant="outline-light" className="rounded-circle p-2 border-opacity-25" style={{ width: '40px', height: '40px' }} href="https://linkedin.com" target="_blank"><Linkedin size={18} /></Button>
+                                <div className="mt-5 d-flex flex-column flex-sm-row justify-content-between align-items-sm-end gap-4">
+                                    <div>
+                                        <h6 className="mb-3 fw-bold">Follow Us</h6>
+                                        <div className="d-flex gap-2">
+                                            <Button variant="outline-light" className="rounded-circle p-2 border-opacity-25" style={{ width: '40px', height: '40px' }} href="https://facebook.com" target="_blank"><Facebook size={18} /></Button>
+                                            <Button variant="outline-light" className="rounded-circle p-2 border-opacity-25" style={{ width: '40px', height: '40px' }} href="https://instagram.com" target="_blank"><Instagram size={18} /></Button>
+                                            <Button variant="outline-light" className="rounded-circle p-2 border-opacity-25" style={{ width: '40px', height: '40px' }} href="https://linkedin.com" target="_blank"><Linkedin size={18} /></Button>
+                                        </div>
+                                    </div>
+                                    
+                                    <div className="d-flex align-items-center gap-3 bg-white bg-opacity-10 p-2 rounded-4 border border-white border-opacity-10">
+                                        <div className="bg-white p-1 rounded-3" style={{ width: '70px', height: '70px', flexShrink: 0 }}>
+                                            <img src="/assets/whatsappqr.png" alt="WhatsApp QR Code" className="w-100 h-100 object-fit-contain" />
+                                        </div>
+                                        <div>
+                                            <p className="mb-1 fw-bold text-white small lh-sm">Scan to Order</p>
+                                            <p className="text-white-50 x-small mb-0 lh-sm" style={{ fontSize: '0.75rem', maxWidth: '120px' }}>You can now order us on WhatsApp!</p>
+                                        </div>
                                     </div>
                                 </div>
                             </Col>
