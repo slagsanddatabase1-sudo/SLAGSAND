@@ -1,9 +1,10 @@
 const express = require("express");
+const path = require("path");
 const cors = require("cors");
 const Razorpay = require("razorpay");
 const crypto = require("crypto");
 const { createClient } = require("@supabase/supabase-js");
-require("dotenv").config();
+require("dotenv").config({ path: path.resolve(__dirname, "../.env") });
 
 // Initialize Supabase Admin Client
 const supabaseAdmin = createClient(
@@ -49,8 +50,8 @@ app.use(cors({
 
 // Initialize Razorpay once
 const razorpay = new Razorpay({
-    key_id: process.env.RAZORPAY_KEY_ID,
-    key_secret: process.env.RAZORPAY_KEY_SECRET,
+    key_id: (process.env.RAZORPAY_KEY_ID || "").trim(),
+    key_secret: (process.env.RAZORPAY_KEY_SECRET || "").trim(),
 });
 
 // Request logging middleware
@@ -129,18 +130,18 @@ app.post("/api/order", async (req, res) => {
             });
         }
 
-        console.log("Creating Razorpay order with options:", options);
+        console.log("Creating Razorpay order with options:", JSON.stringify(options, null, 2));
         const order = await razorpay.orders.create(options);
 
         if (!order) {
-            console.error("❌ Failed to create Razorpay order");
+            console.error("❌ Failed to create Razorpay order: Response was empty");
             return res.status(400).json({
                 error: "Bad Request",
                 message: "Failed to create order"
             });
         }
 
-        console.log("✓ Order created successfully:", order.id);
+        console.log("✓ Razorpay order created successfully:", order.id);
         res.json(order);
     }
     catch (err) {
@@ -151,6 +152,7 @@ app.post("/api/order", async (req, res) => {
         res.status(500).json({
             error: "Internal Server Error",
             message: err.message,
+            razorpay_error: err.error || undefined,
             details: process.env.NODE_ENV === 'development' ? err.stack : undefined
         });
     }
