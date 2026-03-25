@@ -55,15 +55,17 @@ const Checkout = () => {
         console.log("🚀 Payment flow initiated");
         console.log("Order details:", order);
 
-        // Verify Razorpay key is present
-        const razorpayKey = import.meta.env.VITE_RAZORPAY_KEY_ID;
+        // Hardcoded key for testing to bypass Vercel environment variable misconfigurations
+        const razorpayKey = import.meta.env.VITE_RAZORPAY_KEY_ID?.startsWith('rzp_') 
+            ? import.meta.env.VITE_RAZORPAY_KEY_ID 
+            : "rzp_test_SVSp7lxfYNMVj8";
+            
         if (!razorpayKey) {
             console.error("❌ VITE_RAZORPAY_KEY_ID not found in environment variables");
             alert("Configuration error: Razorpay key not found. Please contact support.");
             return;
         }
-        console.log("✓ Razorpay key found:", razorpayKey);
-        console.log("✓ Expected key from .env:", "rzp_test_SVSp7lxfYNMVj8"); // Cross-check with known valid key
+        console.log("✓ Razorpay key being used:", razorpayKey);
 
         setVerifying(true);
         try {
@@ -108,9 +110,9 @@ const Checkout = () => {
                 key: razorpayKey,
                 amount: razorpayOrder.amount,
                 currency: razorpayOrder.currency,
-                name: "Eco Sand",
+                name: "Slagwala",
                 description: "Order Payment",
-                image: "", // Set to empty to avoid logo loading errors in production
+                // Intentionally omitted 'image' to allow Razorpay to use its default and avoid CORS issues
                 order_id: razorpayOrder.id,
                 handler: async function (response) {
                     console.log("✓ Payment successful, validating...");
@@ -173,6 +175,11 @@ const Checkout = () => {
                 alert("Payment gateway not loaded. Please refresh the page and try again.");
                 return;
             }
+
+            console.log("Final Checkout Options:", {
+                ...options,
+                handler: "[Function]"
+            });
 
             const rzp1 = new window.Razorpay(options);
             console.log("✓ Razorpay instance created, opening modal...");
