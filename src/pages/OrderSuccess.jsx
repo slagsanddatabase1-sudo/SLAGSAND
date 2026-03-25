@@ -116,7 +116,7 @@ const OrderSuccess = () => {
                 />
             </div>
 
-            // eslint-disable-next-line react-hooks/static-components, react-hooks/static-components
+            {/* eslint-disable-next-line react-hooks/static-components, react-hooks/static-components */}
             <Confetti />
 
             <Container className="position-relative" style={{ zIndex: 1 }}>
