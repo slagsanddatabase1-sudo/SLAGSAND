@@ -110,7 +110,7 @@ const Checkout = () => {
                 currency: razorpayOrder.currency,
                 name: "Eco Sand",
                 description: "Order Payment",
-                image: "https://slagmala.com/logo.png", // Explicitly set a public logo to avoid local dashboard logo issues
+                image: "", // Set to empty to avoid logo loading errors in production
                 order_id: razorpayOrder.id,
                 handler: async function (response) {
                     console.log("✓ Payment successful, validating...");
