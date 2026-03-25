@@ -62,7 +62,8 @@ const Checkout = () => {
             alert("Configuration error: Razorpay key not found. Please contact support.");
             return;
         }
-        console.log("✓ Razorpay key found:", razorpayKey.substring(0, 8) + "...");
+        console.log("✓ Razorpay key found:", razorpayKey);
+        console.log("✓ Expected key from .env:", "rzp_test_SVSp7lxfYNMVj8"); // Cross-check with known valid key
 
         setVerifying(true);
         try {
@@ -109,6 +110,7 @@ const Checkout = () => {
                 currency: razorpayOrder.currency,
                 name: "Eco Sand",
                 description: "Order Payment",
+                image: "https://slagmala.com/logo.png", // Explicitly set a public logo to avoid local dashboard logo issues
                 order_id: razorpayOrder.id,
                 handler: async function (response) {
                     console.log("✓ Payment successful, validating...");
