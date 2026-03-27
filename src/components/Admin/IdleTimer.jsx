@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Modal, Button } from 'react-bootstrap';
 import { AlertCircle, LogOut, Play } from 'lucide-react';
 
-const IdleTimer = ({ onLogout, idleLimit = 30, countdownLimit = 30 }) => {
+const IdleTimer = ({ onLogout, idleLimit = 60, countdownLimit = 30 }) => {
     const [isIdle, setIsIdle] = useState(false);
     const [countdown, setCountdown] = useState(countdownLimit);
     const timerRef = useRef(null);

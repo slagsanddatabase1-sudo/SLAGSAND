@@ -14,35 +14,68 @@ const Pincodes = () => {
     const [statusFilter, setStatusFilter] = useState('All');
     const [districtFilter, setDistrictFilter] = useState('All');
     const [globalRates, setGlobalRates] = useState({
-        slag_basicrate: '900',
-        transportation_by_truck: '400',
-        unloading_charges: '560'
+        slag_basicrate: '',
+        transportation_by_truck: '',
+        unloading_charges: '',
+        km: '',
+        forty_ton_hydraulic: '',
+        thirty_ton_hydraulic: ''
     });
     const [districts, setDistricts] = useState([]);
+    const [selectedIds, setSelectedIds] = useState([]);
+    const [updateTarget, setUpdateTarget] = useState('all'); // 'all' or 'selected'
+
+    const handleSelectAll = (e) => {
+        if (e.target.checked) {
+            const currentIds = currentPincodes.map(p => p.id);
+            setSelectedIds(prev => [...new Set([...prev, ...currentIds])]);
+        } else {
+            const currentIds = currentPincodes.map(p => p.id);
+            setSelectedIds(prev => prev.filter(id => !currentIds.includes(id)));
+        }
+    };
+
+    const handleSelectRow = (id) => {
+        setSelectedIds(prev => 
+            prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]
+        );
+    };
 
     const handleGlobalUpdate = async () => {
-        if (!window.confirm('This will update specified rates for ALL pincodes. Are you sure?')) return;
+        const targetCount = updateTarget === 'all' ? filteredPincodes.length : selectedIds.length;
+        
+        if (updateTarget === 'selected' && selectedIds.length === 0) {
+            alert('Please select at least one pincode from the table.');
+            return;
+        }
+
+        if (!window.confirm(`This will update specified rates for ${updateTarget === 'all' ? 'ALL' : selectedIds.length} ${updateTarget === 'all' ? 'matched' : ''} pincodes. Are you sure?`)) return;
 
         try {
             setLoading(true);
 
-            // 1. Save to global_configs table
-            const configUpdates = Object.entries(globalRates)
-                .filter(([key, value]) => value !== '')
-                .map(([key, value]) => ({ key, value }));
+            // 1. Save to global_configs table (only if updating all)
+            if (updateTarget === 'all') {
+                const configUpdates = Object.entries(globalRates)
+                    .filter(([key, value]) => value !== '')
+                    .map(([key, value]) => ({ key, value }));
 
-            if (configUpdates.length > 0) {
-                const { error: configError } = await supabase
-                    .from('global_configs')
-                    .upsert(configUpdates);
-                if (configError) throw configError;
+                if (configUpdates.length > 0) {
+                    const { error: configError } = await supabase
+                        .from('global_configs')
+                        .upsert(configUpdates);
+                    if (configError) throw configError;
+                }
             }
 
-            // 2. Update all pincodes in database
+            // 2. Prepare update data
             const updateData = {};
-            if (globalRates.slag_basicrate) updateData.slag_basicrate = globalRates.slag_basicrate;
-            if (globalRates.transportation_by_truck) updateData.transportation_by_truck = globalRates.transportation_by_truck;
-            if (globalRates.unloading_charges) updateData.unloading_charges = globalRates.unloading_charges;
+            if (globalRates.slag_basicrate !== '') updateData.slag_basicrate = globalRates.slag_basicrate;
+            if (globalRates.transportation_by_truck !== '') updateData.transportation_by_truck = globalRates.transportation_by_truck;
+            if (globalRates.unloading_charges !== '') updateData.unloading_charges = globalRates.unloading_charges;
+            if (globalRates.km !== '') updateData.km = globalRates.km;
+            if (globalRates.forty_ton_hydraulic !== '') updateData.forty_ton_hydraulic = globalRates.forty_ton_hydraulic;
+            if (globalRates.thirty_ton_hydraulic !== '') updateData.thirty_ton_hydraulic = globalRates.thirty_ton_hydraulic;
 
             if (Object.keys(updateData).length === 0) {
                 alert('Please enter at least one value to update');
@@ -50,21 +83,35 @@ const Pincodes = () => {
                 return;
             }
 
-            const { error } = await supabase
-                .from('pincodes')
-                .update(updateData)
-                .neq('id', 0);
+            // 3. Update pincodes in database
+            let query = supabase.from('pincodes').update(updateData);
+            
+            if (updateTarget === 'all') {
+                // If there are filters applied, we should probably only update filtered ones?
+                // The original code used .neq('id', 0) which is "all".
+                // But the user might expect it to apply to the CURRENTLY FILTERED list if they are looking at it.
+                // However, "Apply to All" usually means "Everything".
+                // I'll stick to 'all' = all matching filters or all in DB?
+                // The original code was: .neq('id', 0) -> update ALL in DB.
+                // I will maintain that for 'all', but add filter if updateTarget is 'selected'.
+                query = query.neq('id', 0);
+            } else {
+                query = query.in('id', selectedIds);
+            }
 
+            const { error } = await query;
             if (error) throw error;
 
-            // Re-calculate final prices for all
-            const { data: allPincodes, error: fetchError } = await supabase
-                .from('pincodes')
-                .select('*');
+            // 4. Re-calculate final prices for affected pincodes
+            let fetchQuery = supabase.from('pincodes').select('*');
+            if (updateTarget === 'selected') {
+                fetchQuery = fetchQuery.in('id', selectedIds);
+            }
 
+            const { data: affectedPincodes, error: fetchError } = await fetchQuery;
             if (fetchError) throw fetchError;
 
-            for (const p of allPincodes) {
+            for (const p of affectedPincodes) {
                 const basic = parseFloat(p.slag_basicrate) || 0;
                 const transport = parseFloat(p.transportation_by_truck) || 0;
                 const unloading = parseFloat(p.unloading_charges) || 0;
@@ -73,7 +120,8 @@ const Pincodes = () => {
                 await supabase.from('pincodes').update({ final_price: final.toFixed(2).toString() }).eq('id', p.id);
             }
 
-            alert('Global rates updated and final prices recalculated!');
+            alert(`${updateTarget === 'all' ? 'Global' : 'Selected'} rates updated and final prices recalculated!`);
+            setSelectedIds([]); // Clear selection after update
             fetchPincodes();
         } catch (error) {
             console.error('Error in global update:', error);
@@ -503,25 +551,67 @@ const Pincodes = () => {
                         <Col xs={12} sm={4} lg={2}>
                             <Form.Group>
                                 <Form.Label className="x-small fw-bold text-muted">Basic Rate (₹)</Form.Label>
-                                <Form.Control size="sm" type="text" placeholder="Global Basic" value={globalRates.slag_basicrate} onChange={(e) => setGlobalRates({ ...globalRates, slag_basicrate: e.target.value })} />
+                                <Form.Control size="sm" type="text" placeholder="Basic" value={globalRates.slag_basicrate} onChange={(e) => setGlobalRates({ ...globalRates, slag_basicrate: e.target.value })} />
                             </Form.Group>
                         </Col>
                         <Col xs={12} sm={4} lg={2}>
                             <Form.Group>
                                 <Form.Label className="x-small fw-bold text-muted">Transport (₹)</Form.Label>
-                                <Form.Control size="sm" type="text" placeholder="Global Transport" value={globalRates.transportation_by_truck} onChange={(e) => setGlobalRates({ ...globalRates, transportation_by_truck: e.target.value })} />
+                                <Form.Control size="sm" type="text" placeholder="Transport" value={globalRates.transportation_by_truck} onChange={(e) => setGlobalRates({ ...globalRates, transportation_by_truck: e.target.value })} />
                             </Form.Group>
                         </Col>
                         <Col xs={12} sm={4} lg={2}>
                             <Form.Group>
                                 <Form.Label className="x-small fw-bold text-muted">Unloading (₹)</Form.Label>
-                                <Form.Control size="sm" type="text" placeholder="Global Unloading" value={globalRates.unloading_charges} onChange={(e) => setGlobalRates({ ...globalRates, unloading_charges: e.target.value })} />
+                                <Form.Control size="sm" type="text" placeholder="Unloading" value={globalRates.unloading_charges} onChange={(e) => setGlobalRates({ ...globalRates, unloading_charges: e.target.value })} />
                             </Form.Group>
                         </Col>
-                        <Col xs={12} lg={6}>
-                            <Button variant="dark" size="sm" onClick={handleGlobalUpdate} disabled={loading} className="w-100 py-2 fw-bold">
-                                {loading ? <Spinner animation="border" size="sm" /> : 'Apply to All (Basic, Transport, Unloading) & Recalculate Final Price'}
-                            </Button>
+                        <Col xs={12} sm={4} lg={2}>
+                            <Form.Group>
+                                <Form.Label className="x-small fw-bold text-muted">Km</Form.Label>
+                                <Form.Control size="sm" type="text" placeholder="Enter Kilometers" value={globalRates.km} onChange={(e) => setGlobalRates({ ...globalRates, km: e.target.value })} />
+                            </Form.Group>
+                        </Col>
+                        <Col xs={12} sm={4} lg={2}>
+                            <Form.Group>
+                                <Form.Label className="x-small fw-bold text-muted">40 Ton (₹)</Form.Label>
+                                <Form.Control size="sm" type="text" placeholder="Enter Tons" value={globalRates.forty_ton_hydraulic} onChange={(e) => setGlobalRates({ ...globalRates, forty_ton_hydraulic: e.target.value })} />
+                            </Form.Group>
+                        </Col>
+                        <Col xs={12} sm={4} lg={2}>
+                            <Form.Group>
+                                <Form.Label className="x-small fw-bold text-muted">30 Ton (₹)</Form.Label>
+                                <Form.Control size="sm" type="text" placeholder="Enter Tons" value={globalRates.thirty_ton_hydraulic} onChange={(e) => setGlobalRates({ ...globalRates, thirty_ton_hydraulic: e.target.value })} />
+                            </Form.Group>
+                        </Col>
+                        <Col xs={12} lg={4}>
+                            <div className="d-flex flex-column gap-2">
+                                <div className="d-flex gap-3 mb-1">
+                                    <Form.Check 
+                                        type="radio"
+                                        label="All Pincodes"
+                                        name="updateTarget"
+                                        id="target-all"
+                                        checked={updateTarget === 'all'}
+                                        onChange={() => setUpdateTarget('all')}
+                                        className="small fw-bold cursor-pointer"
+                                    />
+                                    <Form.Check 
+                                        type="radio"
+                                        label={`Selected Pincodes (${selectedIds.length})`}
+                                        name="updateTarget"
+                                        id="target-selected"
+                                        checked={updateTarget === 'selected'}
+                                        onChange={() => setUpdateTarget('selected')}
+                                        className="small fw-bold cursor-pointer"
+                                    />
+                                </div>
+                                <Button variant="dark" size="sm" onClick={handleGlobalUpdate} disabled={loading} className="w-100 py-2 fw-bold">
+                                    {loading ? <Spinner animation="border" size="sm" /> : 
+                                     updateTarget === 'all' ? 'Apply to ALL Pincodes & Recalculate' : 
+                                     `Apply to ${selectedIds.length} Selected Pincodes & Recalculate`}
+                                </Button>
+                            </div>
                         </Col>
                     </Row>
                 </Card.Body>
@@ -578,6 +668,16 @@ const Pincodes = () => {
                         <Table hover className="align-middle mb-0" style={{ minWidth: '1200px' }}>
                             <thead className="bg-light text-secondary">
                                 <tr>
+                                    {updateTarget === 'selected' && (
+                                        <th className="border-0 font-weight-bold" style={{ width: '40px' }}>
+                                            <Form.Check 
+                                                type="checkbox"
+                                                onChange={handleSelectAll}
+                                                checked={currentPincodes.length > 0 && currentPincodes.every(p => selectedIds.includes(p.id))}
+                                                indeterminate={selectedIds.length > 0 && !currentPincodes.every(p => selectedIds.includes(p.id))}
+                                            />
+                                        </th>
+                                    )}
                                     <th className="border-0 font-weight-bold">City</th>
                                     <th className="border-0 font-weight-bold">Pincode</th>
                                     <th className="border-0 font-weight-bold">Status</th>
@@ -596,7 +696,16 @@ const Pincodes = () => {
                             <tbody>
                                 {currentPincodes.length > 0 ? (
                                     currentPincodes.map((p) => (
-                                        <tr key={p.id}>
+                                        <tr key={p.id} className={updateTarget === 'selected' && selectedIds.includes(p.id) ? 'table-primary' : ''}>
+                                            {updateTarget === 'selected' && (
+                                                <td>
+                                                    <Form.Check 
+                                                        type="checkbox"
+                                                        checked={selectedIds.includes(p.id)}
+                                                        onChange={() => handleSelectRow(p.id)}
+                                                    />
+                                                </td>
+                                            )}
                                             <td className="fw-medium text-dark">{p.city || p.City || '-'}</td>
                                             <td>
                                                 <Badge bg="light" text="dark" className="border">

@@ -248,7 +248,7 @@ const Orders = () => {
                 </Modal.Body>
                 <Modal.Footer className="border-0">
                     <Button variant="secondary" onClick={() => setShowModal(false)}>Close</Button>
-                    <Button variant="primary" onClick={() => window.print()}>Invoice / Print</Button>
+                    {/* <Button variant="primary" onClick={() => window.print()}>Invoice / Print</Button> */}
                 </Modal.Footer>
             </Modal>
 
