@@ -123,9 +123,9 @@ const OrderNow = () => {
                 const qtyNum = parseFloat(quantity);
                 const basePrice = unitPrice * qtyNum;
 
-                // GST Calculation (18% Global)
+                // GST Calculation (5% Global)
                 // Determine Split: Integrated or Split
-                let gstRate = 0.18;
+                let gstRate = 0.05;
                 let isIgst = true;
 
                 if (gstNumber && gstNumber.length >= 2) {
@@ -254,7 +254,7 @@ const OrderNow = () => {
                     <RevealOnScroll direction="down">
                         <h1 className="display-4 fw-bold text-white mb-2">Order Eco Sand</h1>
                         <p className="text-white-50 lead">Premium quality slag sand delivered straight to your site.</p>
-                        
+
                         <div className="mt-4 pt-3 border-top border-white border-opacity-10 d-inline-block" style={{ maxWidth: '800px' }}>
                             <p className="text-white-50 small text-uppercase fw-bold mb-3" style={{ letterSpacing: '1px' }}>We Supply Slag Sand In</p>
                             <div className="d-flex flex-wrap justify-content-center gap-2">
@@ -480,17 +480,17 @@ const OrderNow = () => {
 
                                                         {pricing.isIgst ? (
                                                             <div className="d-flex justify-content-between mb-3 small text-secondary">
-                                                                <span>IGST (18%)</span>
+                                                                <span>IGST (5%)</span>
                                                                 <span>₹{pricing.gstAmount.toFixed(2)}</span>
                                                             </div>
                                                         ) : (
                                                             <>
                                                                 <div className="d-flex justify-content-between mb-1 small text-secondary">
-                                                                    <span>CGST (9%)</span>
+                                                                    <span>CGST (2.5%)</span>
                                                                     <span>₹{(pricing.gstAmount / 2).toFixed(2)}</span>
                                                                 </div>
                                                                 <div className="d-flex justify-content-between mb-3 small text-secondary">
-                                                                    <span>SGST (9%)</span>
+                                                                    <span>SGST (2.5%)</span>
                                                                     <span>₹{(pricing.gstAmount / 2).toFixed(2)}</span>
                                                                 </div>
                                                             </>
@@ -580,7 +580,7 @@ const OrderNow = () => {
                 </Modal.Header>
                 <Modal.Body>
                     <p className="mb-0">
-                        If you do not enter a GST number, you are losing <strong>18% GST benefit</strong> on your order.
+                        If you do not enter a GST number, you are losing <strong>5% GST benefit</strong> on your order.
                     </p>
                     <p className="text-muted mt-2 small">Do you still want to proceed without GST?</p>
                 </Modal.Body>

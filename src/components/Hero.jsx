@@ -91,7 +91,7 @@ const Hero = ({ onGetSampleClick }) => {
 
             const quantity = Number(calcData.quantity) || 0;
             const basePrice = unitPrice * quantity;
-            const gstAmount = calcData.gst ? basePrice * 0.18 : 0;
+            const gstAmount = calcData.gst ? basePrice * 0.05 : 0;
             const total = basePrice + gstAmount;
 
             setPriceResult({ unitPrice, basePrice, gstAmount, total });
@@ -332,7 +332,7 @@ const Hero = ({ onGetSampleClick }) => {
                                             {/* <Form.Group className="mb-4">
                                                 <Form.Check
                                                     type="checkbox"
-                                                    label={<span className="fw-bold text-white">Include GST (18%)</span>}
+                                                    label={<span className="fw-bold text-white">Include GST (5%)</span>}
                                                     checked={calcData.gst}
                                                     onChange={(e) => setCalcData({ ...calcData, gst: e.target.checked })}
                                                     style={{ transform: 'scale(1.1)', transformOrigin: 'left' }}

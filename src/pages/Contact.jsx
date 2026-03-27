@@ -69,7 +69,7 @@ const Contact = () => {
                                             <MapPin className="me-3 mt-1 flex-shrink-0" color="#22c55e" />
                                             <div>
                                                 <h6 className="fw-bold mb-1">Our Office</h6>
-                                                <p className="mb-0 text-white-50 small">Akhil Bharat Varshiya Maheshwari Mahasabha,<br /> Wardhaman Nagar Square, Nagpur, MH 440008</p>
+                                                <p className="mb-0 text-white-50 small">Block Number 5, Maheshwari Society,<br /> Wardhaman Nagar Square, Nagpur, Maharashtra 440008, India</p>
                                             </div>
                                         </div>
 
@@ -77,7 +77,7 @@ const Contact = () => {
                                             <Phone className="me-3 flex-shrink-0" color="#22c55e" />
                                             <div>
                                                 <h6 className="fw-bold mb-1">Phone</h6>
-                                                <p className="mb-0 text-white-50 small">+91 123 456 7890</p>
+                                                <p className="mb-0 text-white-50 small">+91 9876543210</p>
                                             </div>
                                         </div>
 

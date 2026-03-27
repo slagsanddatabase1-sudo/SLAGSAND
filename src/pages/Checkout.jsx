@@ -270,7 +270,7 @@ const Checkout = () => {
                                                 <div className="mb-5 mt-4 mt-md-0">
                                                     <small className="text-muted text-uppercase fw-bold ls-wider">Total Amount to Pay</small>
                                                     <h1 className="display-4 fw-bold text-dark mb-0">₹{order.amount.toFixed(2)}</h1>
-                                                    <small className="text-muted">Includes 18% GST</small>
+                                                    <small className="text-muted">Includes 5% GST</small>
                                                 </div>
 
                                                 {order.payment_method === 'cod' ? (
