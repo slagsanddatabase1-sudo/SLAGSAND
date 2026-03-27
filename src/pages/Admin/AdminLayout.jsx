@@ -4,6 +4,7 @@ import { Container, Nav, Navbar, Button, Spinner, Dropdown, Badge } from 'react-
 import { supabase } from '../../lib/supabase';
 import { LayoutDashboard, ShoppingBag, MapPin, Users, HelpCircle, MessageSquare, LogOut, Star, Menu, Bell, Search, Hash, ChevronLeft } from 'lucide-react';
 import NotificationDropdown from '../../components/Admin/NotificationDropdown';
+import IdleTimer from '../../components/Admin/IdleTimer';
 
 const AdminLayout = () => {
     const [loading, setLoading] = useState(true);
@@ -83,6 +84,8 @@ const AdminLayout = () => {
 
     return (
         <div className="d-flex min-vh-100 bg-light font-sans">
+            {/* Idle Monitor */}
+            <IdleTimer onLogout={handleLogout} />
             {/* Mobile Overlay Backdrop */}
             {sidebarOpen && (
                 <div
