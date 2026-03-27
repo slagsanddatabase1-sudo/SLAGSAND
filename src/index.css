@@ -176,3 +176,30 @@ h6 {
     min-height: 70vh !important;
   }
 }
+
+/* Admin Layout Responsiveness */
+.admin-content-shifted {
+  margin-left: 260px;
+}
+
+@media (max-width: 991px) {
+  .admin-content-shifted {
+    margin-left: 0 !important;
+  }
+  
+  /* Ensure the main container doesn't overflow horizontally */
+  .container-fluid {
+    overflow-x: hidden;
+  }
+}
+
+/* Enhanced Table Responsiveness */
+.table-responsive-wrapper {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  margin-bottom: 1rem;
+}
+
+.table-responsive-wrapper > table {
+  margin-bottom: 0;
+}

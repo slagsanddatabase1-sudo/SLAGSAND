@@ -75,16 +75,17 @@ const Testimonials = () => {
 
     return (
         <Container fluid>
-            <div className="d-flex justify-content-between align-items-center mb-4">
-                <h2 className="fw-bold">Manage Testimonials</h2>
-                <Button variant="success" size="sm" onClick={handleAdd}>
+            <div className="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
+                <h2 className="fw-bold m-0">Manage Testimonials</h2>
+                <Button variant="success" size="sm" onClick={handleAdd} className="w-auto">
                     <Plus size={16} className="me-2" /> Add New Testimonial
                 </Button>
             </div>
 
             {loading ? <div className="text-center p-5"><Spinner animation="border" /></div> : (
-                <div className="bg-white rounded shadow-sm overflow-hidden border">
-                    <Table hover responsive className="mb-0">
+                <div className="bg-white rounded-3 shadow-sm border mb-4">
+                    <div className="table-responsive-wrapper">
+                        <Table hover className="mb-0 align-middle">
                         <thead className="bg-light">
                             <tr>
                                 <th>Client Name</th>
@@ -121,13 +122,14 @@ const Testimonials = () => {
                         </tbody>
                     </Table>
                 </div>
+            </div>
             )}
 
             <Modal show={showModal} onHide={() => setShowModal(false)} size="lg">
                 <Modal.Header closeButton>
                     <Modal.Title>{editingId ? 'Edit Testimonial' : 'Add New Testimonial'}</Modal.Title>
                 </Modal.Header>
-                <Modal.Body className="p-4">
+                <Modal.Body className="p-3 p-md-4">
                     <Form onSubmit={handleSubmit}>
                         <Form.Group className="mb-3">
                             <Form.Label className="fw-bold">Client Name</Form.Label>

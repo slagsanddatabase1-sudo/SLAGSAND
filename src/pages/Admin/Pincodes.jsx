@@ -466,58 +466,59 @@ const Pincodes = () => {
 
     return (
         <Container fluid>
-            <div className="d-flex justify-content-between align-items-center mb-4">
-                <div>
-                    <h2 className="fw-bold mb-1">Pincodes & Pricing</h2>
+            <div className="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
+                <div className="text-start">
+                    <h2 className="fw-bold mb-1 fs-3">Pincodes & Pricing</h2>
                     <div className="d-flex align-items-center gap-2">
                         <p className="text-muted small mb-0">Manage delivery locations and pricing</p>
                         <Badge bg="secondary" pill className="small">Total: {pincodes.length}</Badge>
                     </div>
                 </div>
-                <div className="d-flex gap-2">
-                    <Button variant="outline-danger" size="sm" onClick={handleDeleteAll}>
+                <div className="d-flex flex-wrap gap-2 justify-content-start justify-content-md-end">
+                    <Button variant="outline-danger" size="sm" onClick={handleDeleteAll} className="px-3">
                         <Trash2 size={16} className="me-1" /> Delete All
                     </Button>
-                    <Button variant="outline-success" size="sm" onClick={handleCSVExport}>
-                        <Download size={16} className="me-1" /> Export CSV
+                    <Button variant="outline-success" size="sm" onClick={handleCSVExport} className="px-3">
+                        <Download size={16} className="me-1" /> Export
                     </Button>
-                    <Button variant="outline-primary" size="sm" as="label" style={{ cursor: 'pointer' }}>
-                        <Upload size={16} className="me-1" /> Import CSV
+                    <Button variant="outline-primary" size="sm" as="label" style={{ cursor: 'pointer' }} className="px-3">
+                        <Upload size={16} className="me-1" /> Import
                         <input type="file" accept=".csv" onChange={handleCSVImport} style={{ display: 'none' }} />
                     </Button>
-                    <Button variant="primary" size="sm" onClick={() => handleOpenModal()}>
-                        <Plus size={16} className="me-1" /> Add Pincode
+                    <Button variant="primary" size="sm" onClick={() => handleOpenModal()} className="px-3">
+                        <Plus size={16} className="me-1" /> Add New
                     </Button>
                 </div>
             </div>
 
             {/* Global Pricing Update Section */}
             <Card className="border-0 shadow-sm rounded-4 mb-4 bg-light">
-                <Card.Body className="p-4">
-                    <h5 className="fw-bold mb-3 d-flex align-items-center gap-2">
-                        <Calculator size={20} className="text-primary" /> Global Pricing Settings
-                        <small className="text-muted fw-normal" style={{ fontSize: '0.75rem' }}>(Apply to ALL pincodes at once)</small>
+                <Card.Body className="p-3 p-md-4">
+                    <h5 className="fw-bold mb-3 d-flex flex-wrap align-items-center gap-2">
+                        <Calculator size={20} className="text-primary" /> 
+                        <span>Global Pricing Settings</span>
+                        <small className="text-muted fw-normal" style={{ fontSize: '0.75rem' }}>(All pincodes)</small>
                     </h5>
                     <Row className="g-3 align-items-end">
-                        <Col lg={2} md={4}>
+                        <Col xs={12} sm={4} lg={2}>
                             <Form.Group>
                                 <Form.Label className="x-small fw-bold text-muted">Basic Rate (₹)</Form.Label>
                                 <Form.Control size="sm" type="text" placeholder="Global Basic" value={globalRates.slag_basicrate} onChange={(e) => setGlobalRates({ ...globalRates, slag_basicrate: e.target.value })} />
                             </Form.Group>
                         </Col>
-                        <Col lg={2} md={4}>
+                        <Col xs={12} sm={4} lg={2}>
                             <Form.Group>
                                 <Form.Label className="x-small fw-bold text-muted">Transport (₹)</Form.Label>
                                 <Form.Control size="sm" type="text" placeholder="Global Transport" value={globalRates.transportation_by_truck} onChange={(e) => setGlobalRates({ ...globalRates, transportation_by_truck: e.target.value })} />
                             </Form.Group>
                         </Col>
-                        <Col lg={2} md={4}>
+                        <Col xs={12} sm={4} lg={2}>
                             <Form.Group>
                                 <Form.Label className="x-small fw-bold text-muted">Unloading (₹)</Form.Label>
                                 <Form.Control size="sm" type="text" placeholder="Global Unloading" value={globalRates.unloading_charges} onChange={(e) => setGlobalRates({ ...globalRates, unloading_charges: e.target.value })} />
                             </Form.Group>
                         </Col>
-                        <Col lg={6} md={8}>
+                        <Col xs={12} lg={6}>
                             <Button variant="dark" size="sm" onClick={handleGlobalUpdate} disabled={loading} className="w-100 py-2 fw-bold">
                                 {loading ? <Spinner animation="border" size="sm" /> : 'Apply to All (Basic, Transport, Unloading) & Recalculate Final Price'}
                             </Button>
@@ -529,7 +530,7 @@ const Pincodes = () => {
             {/* Filters Section */}
             <div className="bg-white p-3 rounded shadow-sm border mb-4">
                 <Row className="g-3">
-                    <Col md={4}>
+                    <Col xs={12} md={4}>
                         <Form.Label className="small fw-bold text-muted">Search</Form.Label>
                         <div className="position-relative">
                             <Search size={16} className="position-absolute text-muted" style={{ left: '12px', top: '50%', transform: 'translateY(-50%)' }} />
@@ -542,14 +543,14 @@ const Pincodes = () => {
                             />
                         </div>
                     </Col>
-                    <Col md={3}>
+                    <Col xs={6} md={3}>
                         <Form.Label className="small fw-bold text-muted">District</Form.Label>
                         <Form.Select value={districtFilter} onChange={(e) => setDistrictFilter(e.target.value)}>
                             <option value="All">All Districts</option>
                             {districts.map(d => <option key={d} value={d}>{d}</option>)}
                         </Form.Select>
                     </Col>
-                    <Col md={3}>
+                    <Col xs={6} md={3}>
                         <Form.Label className="small fw-bold text-muted">Status</Form.Label>
                         <Form.Select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
                             <option value="All">All Status</option>
@@ -557,7 +558,7 @@ const Pincodes = () => {
                             <option value="No Delivery">No Delivery</option>
                         </Form.Select>
                     </Col>
-                    <Col md={2} className="d-flex align-items-end">
+                    <Col xs={12} md={2} className="d-flex align-items-end">
                         <Button variant="outline-secondary" className="w-100" onClick={() => {
                             setSearchTerm('');
                             setStatusFilter('All');
@@ -572,8 +573,8 @@ const Pincodes = () => {
                     <Spinner animation="border" />
                 </div>
             ) : (
-                <div className="bg-white rounded shadow-sm overflow-hidden border">
-                    <div className="table-responsive" style={{ maxHeight: '600px', overflowY: 'auto' }}>
+                <div className="bg-white rounded-3 shadow-sm border mb-4">
+                    <div className="table-responsive-wrapper" style={{ maxHeight: '600px' }}>
                         <Table hover className="align-middle mb-0" style={{ minWidth: '1200px' }}>
                             <thead className="bg-light text-secondary">
                                 <tr>
@@ -712,7 +713,7 @@ const Pincodes = () => {
                 <Modal.Header closeButton className="border-0 pb-0">
                     <Modal.Title className="fw-bold">{editMode ? 'Edit Pincode' : 'Add New Pincode'}</Modal.Title>
                 </Modal.Header>
-                <Modal.Body className="p-4">
+                <Modal.Body className="p-3 p-md-4">
                     <Tabs defaultActiveKey="basic" className="mb-3">
                         <Tab eventKey="basic" title="Basic Info">
                             <Form>

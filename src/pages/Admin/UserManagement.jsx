@@ -132,79 +132,81 @@ const UserManagement = () => {
 
             {loading ? <Spinner animation="border" /> : (
                 <>
-                    <div className="d-flex justify-content-between align-items-center mb-4">
-                        <h4 className="fw-bold mb-0">User Access Management</h4>
-                        <Button variant="primary" onClick={() => setShowModal(true)}>
+                    <div className="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
+                        <h4 className="fw-bold mb-0 fs-3">User Access Management</h4>
+                        <Button variant="primary" onClick={() => setShowModal(true)} className="w-auto">
                             <Plus size={18} className="me-2" /> Add New User
                         </Button>
                     </div>
 
-                    <div className="bg-white rounded shadow-sm border overflow-hidden">
-                        <Table responsive hover className="mb-0 align-middle text-nowrap">
-                            <thead className="bg-light">
-                                <tr>
-                                    <th className="border-0 py-3 ps-4">Email Address</th>
-                                    <th className="border-0 py-3">Role</th>
-                                    <th className="border-0 py-3">Status</th>
-                                    <th className="border-0 py-3 text-end pe-4">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {users.length > 0 ? (
-                                    users.map((user) => (
-                                        <tr key={user.id}>
-                                            <td className="ps-4">
-                                                <div className="d-flex align-items-center">
-                                                    <div className="bg-light rounded-circle p-2 me-3 text-primary">
-                                                        <Mail size={16} />
-                                                    </div>
-                                                    <span className="fw-medium">{user.email}</span>
-                                                </div>
-                                            </td>
-                                            <td>
-                                                <Form.Select
-                                                    size="sm"
-                                                    value={user.role}
-                                                    onChange={(e) => handleUpdateRole(user.email, e.target.value)}
-                                                    className="w-auto border-0 bg-light fw-bold text-uppercase px-3 py-2 cursor-pointer"
-                                                    style={{ fontSize: '0.75rem' }}
-                                                >
-                                                    <option value="admin">Admin</option>
-                                                    <option value="executive">Executive</option>
-                                                    <option value="staff">Staff</option>
-                                                </Form.Select>
-                                            </td>
-                                            <td>
-                                                <Badge bg="success" className="bg-opacity-10 text-success px-3 py-2 rounded-pill">
-                                                    Active
-                                                </Badge>
-                                            </td>
-                                            <td className="text-end pe-4">
-                                                <Button
-                                                    variant="link"
-                                                    className="text-danger p-0"
-                                                    onClick={() => handleDelete(user.email)}
-                                                    title="Revoke Access"
-                                                >
-                                                    <Trash2 size={18} />
-                                                </Button>
-                                            </td>
-                                        </tr>
-                                    ))
-                                ) : (
+                    <div className="bg-white rounded-3 shadow-sm border mb-4">
+                        <div className="table-responsive-wrapper">
+                            <Table hover className="mb-0 align-middle text-nowrap">
+                                <thead className="bg-light">
                                     <tr>
-                                        <td colSpan="4" className="text-center py-5 text-muted">No users found.</td>
+                                        <th className="border-0 py-3 ps-4">Email Address</th>
+                                        <th className="border-0 py-3">Role</th>
+                                        <th className="border-0 py-3">Status</th>
+                                        <th className="border-0 py-3 text-end pe-4">Actions</th>
                                     </tr>
-                                )}
-                            </tbody>
-                        </Table>
+                                </thead>
+                                <tbody>
+                                    {users.length > 0 ? (
+                                        users.map((user) => (
+                                            <tr key={user.id}>
+                                                <td className="ps-4">
+                                                    <div className="d-flex align-items-center">
+                                                        <div className="bg-light rounded-circle p-2 me-3 text-primary">
+                                                            <Mail size={16} />
+                                                        </div>
+                                                        <span className="fw-medium">{user.email}</span>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <Form.Select
+                                                        size="sm"
+                                                        value={user.role}
+                                                        onChange={(e) => handleUpdateRole(user.email, e.target.value)}
+                                                        className="w-auto border-0 bg-light fw-bold text-uppercase px-3 py-2 cursor-pointer"
+                                                        style={{ fontSize: '0.75rem' }}
+                                                    >
+                                                        <option value="admin">Admin</option>
+                                                        <option value="executive">Executive</option>
+                                                        <option value="staff">Staff</option>
+                                                    </Form.Select>
+                                                </td>
+                                                <td>
+                                                    <Badge bg="success" className="bg-opacity-10 text-success px-3 py-2 rounded-pill">
+                                                        Active
+                                                    </Badge>
+                                                </td>
+                                                <td className="text-end pe-4">
+                                                    <Button
+                                                        variant="link"
+                                                        className="text-danger p-0"
+                                                        onClick={() => handleDelete(user.email)}
+                                                        title="Revoke Access"
+                                                    >
+                                                        <Trash2 size={18} />
+                                                    </Button>
+                                                </td>
+                                            </tr>
+                                        ))
+                                    ) : (
+                                        <tr>
+                                            <td colSpan="4" className="text-center py-5 text-muted">No users found.</td>
+                                        </tr>
+                                    )}
+                                </tbody>
+                            </Table>
+                        </div>
                     </div>
                 </>
             )}
 
             <Modal show={showModal} onHide={resetModal}>
                 <Modal.Header closeButton><Modal.Title>Create New User</Modal.Title></Modal.Header>
-                <Modal.Body>
+                <Modal.Body className="p-3 p-md-4">
                     <Form onSubmit={handleCreateUser}>
 
 

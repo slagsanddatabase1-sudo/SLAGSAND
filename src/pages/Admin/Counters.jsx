@@ -57,9 +57,9 @@ const Counters = () => {
 
     return (
         <Container fluid>
-            <div className="d-flex justify-content-between align-items-center mb-4">
-                <h2 className="fw-bold">Manage Achievements</h2>
-                <Button variant="outline-primary" size="sm" onClick={fetchCounters} disabled={loading}>
+            <div className="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
+                <h2 className="fw-bold m-0">Manage Achievements</h2>
+                <Button variant="outline-primary" size="sm" onClick={fetchCounters} disabled={loading} className="w-auto">
                     Refresh Data
                 </Button>
             </div>
@@ -69,8 +69,9 @@ const Counters = () => {
                     <Spinner animation="border" variant="primary" />
                 </div>
             ) : (
-                <div className="bg-white rounded-4 shadow-sm overflow-hidden border">
-                    <Table hover responsive className="mb-0 align-middle">
+                <div className="bg-white rounded-3 shadow-sm border mb-4">
+                    <div className="table-responsive-wrapper">
+                        <Table hover className="mb-0 align-middle">
                         <thead className="bg-light">
                             <tr>
                                 <th className="px-4 py-3 text-secondary small text-uppercase">Achievement Stat</th>
@@ -139,6 +140,7 @@ const Counters = () => {
                         </tbody>
                     </Table>
                 </div>
+            </div>
             )}
         </Container>
     );

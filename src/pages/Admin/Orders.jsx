@@ -95,17 +95,24 @@ const Orders = () => {
 
     return (
         <Container fluid>
-            <div className="d-flex justify-content-between align-items-center mb-4">
-                <h2 className="fw-bold">Manage Orders</h2>
-                <div>
-                    <Button variant="outline-danger" size="sm" className="me-2" onClick={handleDeleteAllOrders}>Delete All Orders</Button>
+            <div className="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
+                <h2 className="fw-bold m-0 fs-3">Manage Orders</h2>
+                <div className="d-flex gap-2">
+                    <Button variant="outline-danger" size="sm" onClick={handleDeleteAllOrders}>
+                        <Trash2 size={16} className="me-1" /> Delete All
+                    </Button>
                     <Button variant="outline-primary" size="sm" onClick={fetchOrders}>Refresh Orders</Button>
                 </div>
             </div>
 
-            {loading ? <div className="text-center py-5"><Spinner animation="border" /></div> : (
-                <div className="bg-white rounded shadow-sm overflow-hidden border">
-                    <Table hover responsive className="mb-0">
+            {loading ? (
+                <div className="text-center p-5">
+                    <Spinner animation="border" variant="primary" />
+                </div>
+            ) : (
+                <div className="bg-white rounded-3 shadow-sm border mb-4">
+                    <div className="table-responsive-wrapper">
+                        <Table hover className="mb-0 align-middle">
                         <thead className="bg-light">
                             <tr>
                                 <th>Order ID</th>
@@ -164,6 +171,7 @@ const Orders = () => {
                         </tbody>
                     </Table>
                 </div>
+            </div>
             )}
 
             {/* Order Details Modal */}
@@ -171,11 +179,11 @@ const Orders = () => {
                 <Modal.Header closeButton className="border-0 pb-0">
                     <Modal.Title className="fw-bold">Order Details #{selectedOrder?.id}</Modal.Title>
                 </Modal.Header>
-                <Modal.Body className="p-4">
+                <Modal.Body className="p-3 p-md-4">
                     {selectedOrder && (
                         <Row className="gy-4">
                             <Col md={6}>
-                                <Card className="border-0 bg-light h-100 p-3">
+                                <Card className="border-0 bg-light h-100 p-3 p-md-3">
                                     <label className="text-uppercase text-muted fw-bold mb-3 d-block" style={{ fontSize: '0.7rem' }}>
                                         <User size={14} className="me-1 mb-1" /> Customer Information
                                     </label>
@@ -195,7 +203,7 @@ const Orders = () => {
                             </Col>
 
                             <Col md={6}>
-                                <Card className="border-0 bg-light h-100 p-3">
+                                <Card className="border-0 bg-light h-100 p-3 p-md-3">
                                     <label className="text-uppercase text-muted fw-bold mb-3 d-block" style={{ fontSize: '0.7rem' }}>
                                         <ShoppingBag size={14} className="me-1 mb-1" /> Order Configuration
                                     </label>

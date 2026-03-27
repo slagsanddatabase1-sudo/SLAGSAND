@@ -70,14 +70,14 @@ const Dashboard = () => {
 
     return (
         <Container fluid>
-            <div className="d-flex justify-content-between align-items-center mb-4">
-                <h2 className="fw-bold m-0">Dashboard Overview</h2>
-                <Button variant="primary" size="sm" onClick={fetchData}>Refresh Data</Button>
+            <div className="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
+                <h2 className="fw-bold m-0 fs-3">Dashboard Overview</h2>
+                <Button variant="primary" size="sm" onClick={fetchData} className="w-auto">Refresh Data</Button>
             </div>
 
             {/* Stat Cards */}
-            <Row className="mb-4 gy-3">
-                <Col md={3}>
+            <Row className="mb-4 gy-4 gx-3">
+                <Col xs={12} sm={6} lg={3}>
                     <Card className="text-white bg-primary shadow-sm border-0 h-100">
                         <Card.Body className="d-flex flex-column justify-content-center">
                             <div className="d-flex justify-content-between align-items-center">
@@ -87,7 +87,7 @@ const Dashboard = () => {
                         </Card.Body>
                     </Card>
                 </Col>
-                <Col md={3}>
+                <Col xs={12} sm={6} lg={3}>
                     <Card className="text-white bg-success shadow-sm border-0 h-100">
                         <Card.Body className="d-flex flex-column justify-content-center">
                             <div className="d-flex justify-content-between align-items-center">
@@ -97,7 +97,7 @@ const Dashboard = () => {
                         </Card.Body>
                     </Card>
                 </Col>
-                <Col md={3}>
+                <Col xs={12} sm={6} lg={3}>
                     <Card className="text-white bg-warning shadow-sm border-0 h-100">
                         <Card.Body className="d-flex flex-column justify-content-center">
                             <div className="d-flex justify-content-between align-items-center">
@@ -107,7 +107,7 @@ const Dashboard = () => {
                         </Card.Body>
                     </Card>
                 </Col>
-                <Col md={3}>
+                <Col xs={12} sm={6} lg={3}>
                     <Card className="text-white bg-info shadow-sm border-0 h-100">
                         <Card.Body className="d-flex flex-column justify-content-center">
                             <div className="d-flex justify-content-between align-items-center">

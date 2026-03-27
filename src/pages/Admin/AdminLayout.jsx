@@ -14,6 +14,7 @@ const AdminLayout = () => {
     const location = useLocation();
 
     const [userRole, setUserRole] = useState(null);
+    const [userName, setUserName] = useState('');
 
     useEffect(() => {
         checkUser();
@@ -25,15 +26,27 @@ const AdminLayout = () => {
             navigate('/admin/login');
         } else {
             setUser(user);
+
+            // Derive display name from metadata or email prefix
+            const metaName = user.user_metadata?.full_name || user.user_metadata?.name;
+            if (metaName) {
+                setUserName(metaName);
+            } else {
+                // Capitalise the part before @ in the email
+                const prefix = user.email.split('@')[0];
+                setUserName(prefix.charAt(0).toUpperCase() + prefix.slice(1));
+            }
+
             // Fetch Role
             const { data, error } = await supabase
                 .from('user_roles')
-                .select('role')
+                .select('role, name')
                 .eq('email', user.email)
                 .single();
 
             if (data) {
                 setUserRole(data.role);
+                if (data.name) setUserName(data.name); // Use DB name if available
             } else {
                 // FALLBACK TO ADMIN TEMPORARILY
                 // This ensures you are not locked out while setting up roles.
@@ -102,7 +115,7 @@ const AdminLayout = () => {
                 <div className="py-4 overflow-auto h-100 pb-5">
 
                     {/* Dashboard - Visible to Admin & Executive */}
-                    {(userRole === 'admin' || userRole === 'executive') && (
+                    {(userRole === 'admin' || userRole === 'executive' || userRole === 'staff') && (
                         <>
                             <small className="text-uppercase text-muted fw-bold px-4 mb-2 d-block" style={{ fontSize: '0.7rem', letterSpacing: '0.5px' }}>Overview</small>
                             <Nav className="flex-column mb-4">
@@ -116,7 +129,7 @@ const AdminLayout = () => {
                         <NavItem to="/admin/orders" icon={ShoppingBag} label="Orders" />
                         <NavItem to="/admin/inquiries" icon={MessageSquare} label="Inquiries" />
                         {/* Marketers - Admin & Executive only */}
-                        {(userRole === 'admin' || userRole === 'executive') && (
+                        {(userRole === 'admin' || userRole === 'executive' || userRole === 'staff') && (
                             <NavItem to="/admin/marketers" icon={Users} label="Marketers" />
                         )}
                         {/* Users - Admin Only */}
@@ -126,7 +139,7 @@ const AdminLayout = () => {
                     </Nav>
 
                     {/* Content - Admin & Executive only */}
-                    {(userRole === 'admin' || userRole === 'executive') && (
+                    {(userRole === 'admin' || userRole === 'executive' || userRole === 'staff') && (
                         <>
                             <small className="text-uppercase text-muted fw-bold px-4 mb-2 d-block" style={{ fontSize: '0.7rem', letterSpacing: '0.5px' }}>Content</small>
                             <Nav className="flex-column mb-4">
@@ -142,19 +155,19 @@ const AdminLayout = () => {
 
             {/* Main Content Wrapper */}
             <div
-                className="flex-grow-1 d-flex flex-column transition-margin"
-                style={{
-                    marginLeft: desktopSidebarOpen ? '260px' : '0',
-                    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
-                }}
+                className={`flex-grow-1 d-flex flex-column ${desktopSidebarOpen ? 'admin-content-shifted' : ''}`}
             >
 
                 {/* Header */}
-                <header className="bg-white border-bottom sticky-top px-4 shadow-sm" style={{ height: '70px' }}>
+                <header className="bg-white border-bottom sticky-top px-3 px-md-4 shadow-sm" style={{ height: '70px', zIndex: 1030 }}>
                     <div className="d-flex align-items-center justify-content-between h-100">
-                        <div className="d-flex align-items-center">
+                        <div className="d-flex align-items-center gap-2">
                             {/* Mobile Toggle */}
-                            <Button variant="link" className="text-dark p-0 me-3 d-lg-none" onClick={() => setSidebarOpen(!sidebarOpen)}>
+                            <Button
+                                variant="link"
+                                className="p-0 d-lg-none text-dark"
+                                onClick={() => setSidebarOpen(true)}
+                            >
                                 <Menu size={24} />
                             </Button>
                             {/* Desktop Expand Button (Visible only when sidebar is closed) */}
@@ -166,7 +179,7 @@ const AdminLayout = () => {
                         </div>
 
                         <div className="d-flex align-items-center gap-3">
-                            <div className="d-none d-md-flex align-items-center bg-light rounded-pill px-3 py-2">
+                            <div className="d-none d-lg-flex align-items-center bg-light rounded-pill px-3 py-2">
                                 <Search size={16} className="text-muted me-2" />
                                 <input type="text" className="border-0 bg-transparent small focus-ring-none" placeholder="Search..." style={{ outline: 'none', width: '150px' }} />
                             </div>
@@ -179,7 +192,7 @@ const AdminLayout = () => {
                                         {user?.email?.[0].toUpperCase()}
                                     </div>
                                     <div className="d-none d-lg-block text-start lh-1 me-2">
-                                        <div className="fw-bold small">{userRole?.toUpperCase()}</div>
+                                        <div className="fw-bold small">{userName ? userName.toUpperCase() : userRole?.toUpperCase()}</div>
                                         <div className="text-muted" style={{ fontSize: '0.7rem' }}>{user?.email}</div>
                                     </div>
                                 </Dropdown.Toggle>
@@ -194,7 +207,7 @@ const AdminLayout = () => {
                 </header>
 
                 {/* Page Content */}
-                <main className="flex-grow-1 p-4">
+                <main className="flex-grow-1 p-3 p-md-4">
 
                     <Outlet context={{ userRole }} />
                 </main>

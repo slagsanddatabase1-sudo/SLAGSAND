@@ -57,8 +57,8 @@ const Inquiries = () => {
 
     return (
         <Container fluid>
-            <div className="d-flex justify-content-between align-items-center mb-4">
-                <h2 className="fw-bold">Inquiries & Leads</h2>
+            <div className="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
+                <h2 className="fw-bold m-0 fs-3">Inquiries & Leads</h2>
                 <div className="d-flex gap-2">
                     {inquiries.length > 0 && (
                         <Button variant="outline-danger" size="sm" onClick={handleDeleteAll}>
@@ -70,8 +70,9 @@ const Inquiries = () => {
             </div>
 
             {loading ? <div className="text-center py-5"><Spinner animation="border" /></div> : (
-                <div className="bg-white rounded shadow-sm overflow-hidden border">
-                    <Table hover responsive className="mb-0">
+                <div className="bg-white rounded-3 shadow-sm border mb-4">
+                    <div className="table-responsive-wrapper">
+                        <Table hover className="mb-0 align-middle">
                         <thead className="bg-light">
                             <tr>
                                 <th>Date</th>
@@ -121,6 +122,7 @@ const Inquiries = () => {
                         </tbody>
                     </Table>
                 </div>
+            </div>
             )}
 
             {/* Inquiry Details Modal */}
@@ -130,7 +132,7 @@ const Inquiries = () => {
                         {selectedInquiry?.type === 'sample' ? 'Sample Request Details' : 'Contact Message Details'}
                     </Modal.Title>
                 </Modal.Header>
-                <Modal.Body className="p-4">
+                <Modal.Body className="p-3 p-md-4">
                     {selectedInquiry && (
                         <Row className="gy-4">
                             <Col md={6}>
@@ -156,7 +158,7 @@ const Inquiries = () => {
                                 </div>
                             </Col>
 
-                            <Col md={6} className="bg-light rounded-3 p-4">
+                            <Col md={6} className="bg-light rounded-3 p-3 p-md-4">
                                 <label className="text-uppercase text-muted fw-bold mb-2 d-block" style={{ fontSize: '0.7rem' }}>
                                     {selectedInquiry.type === 'sample' ? 'Order Details' : 'Message Content'}
                                 </label>
