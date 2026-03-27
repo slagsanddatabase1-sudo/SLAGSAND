@@ -59,24 +59,35 @@ const Hero = ({ onGetSampleClick }) => {
             }
             console.log("Supabase Data:", data);
 
-            // Fallback Logic
             let unitPrice = 0;
 
             if (data && data.length > 0) {
                 const pincodeData = data[0];
-                if (calcData.measure === 'Ton') {
-                    unitPrice = parseFloat(pincodeData.final_price || pincodeData.price_ton || pincodeData.slag_basicrate) || 0;
-                } else if (calcData.measure === 'Brass') {
-                    unitPrice = (parseFloat(pincodeData.final_price || pincodeData.price_ton) || 0) * 2.5;
-                } else if (calcData.measure === 'Foot') {
-                    unitPrice = (parseFloat(pincodeData.final_price || pincodeData.price_ton) || 0) / 20;
+
+                // Check delivery status
+                const status = pincodeData.delivery_status || pincodeData.deliverystatus;
+                if (status === 'No Delivery') {
+                    setError("Delivery not available for this pincode.");
+                    setLoading(false);
+                    return;
                 }
 
-                // If the specific legacy columns exist and are non-zero, we COULD use them, but user said "use final price".
-                // So we stick to final_price for Ton.
+                const qty = String(calcData.quantity);
+                const basic = parseFloat(pincodeData.slag_basicrate) || 0;
+                const transport = parseFloat(pincodeData.transportation_by_truck || pincodeData.transport_rate || pincodeData['transportation By truck'] || pincodeData['Transportation by truck']) || 0;
+                const unloading = parseFloat(pincodeData.unloading_charges) || 0;
+                const fortyVal = parseFloat(pincodeData.forty_ton_hydraulic || pincodeData.forty_ton_hydraulic_type || pincodeData['40 Ton hydrallic Type'] || pincodeData['40 Ton']) || 0;
+                const thirtyVal = parseFloat(pincodeData.thirty_ton_hydraulic || pincodeData.thirty_ton_hydraulic_type || pincodeData['30 Ton hydrallic type'] || pincodeData['30 Ton']) || 0;
+
+                if (qty === '40' && fortyVal > 0) {
+                    unitPrice = basic + fortyVal;
+                } else if (qty === '30' && thirtyVal > 0) {
+                    unitPrice = basic + thirtyVal;
+                } else {
+                    unitPrice = basic + transport + unloading;
+                }
             } else {
                 // No data found in DB
-                // Do NOT fallback to default prices.
             }
 
             // If DB returned 0 or no data, show error
