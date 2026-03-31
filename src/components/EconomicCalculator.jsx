@@ -208,15 +208,11 @@ const EconomicCalculator = () => {
                                                         type="number"
                                                         className="market-input-styled custom-qty-input"
                                                         placeholder={isSqFt ? "Enter Sq Ft" : "Enter Tons"}
-                                                        isInvalid={!!errors.quantity}
                                                         {...register('quantity', { 
-                                                            required: "Quantity is required",
-                                                            min: { value: 1, message: "Minimum 1 required" }
+                                                            required: true,
+                                                            min: 1
                                                         })}
                                                     />
-                                                    <Form.Control.Feedback type="invalid" className="small-error">
-                                                        {errors.quantity?.message}
-                                                    </Form.Control.Feedback>
                                                 </div>
                                             )}
                                         </div>
@@ -246,15 +242,11 @@ const EconomicCalculator = () => {
                                                         type="number"
                                                         className="market-input-styled compact"
                                                         placeholder="0.00"
-                                                        isInvalid={!!errors.marketRate}
                                                         {...register('marketRate', { 
-                                                            required: "Market rate is required",
-                                                            min: { value: 1, message: "Must be > 0" }
+                                                            required: true,
+                                                            min: 1
                                                         })}
                                                     />
-                                                    <Form.Control.Feedback type="invalid" className="small-error">
-                                                        {errors.marketRate?.message}
-                                                    </Form.Control.Feedback>
                                                 </div>
                                             </Form.Group>
 
