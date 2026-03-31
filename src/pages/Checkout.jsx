@@ -270,7 +270,15 @@ const Checkout = () => {
                                                 <div className="mb-5 mt-4 mt-md-0">
                                                     <small className="text-muted text-uppercase fw-bold ls-wider">Total Amount to Pay</small>
                                                     <h1 className="display-4 fw-bold text-dark mb-0">₹{order.amount.toFixed(2)}</h1>
-                                                    <small className="text-muted">Includes 5% GST</small>
+                                                    {order.order_details.measure === 'Sample Order' ? (
+                                                        <div className="mt-1">
+                                                            <span className="badge rounded-pill bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-2 py-1" style={{ fontSize: '0.7rem' }}>
+                                                                Material is Free - Only courier charges applicable
+                                                            </span>
+                                                        </div>
+                                                    ) : (
+                                                        <small className="text-muted">Includes GST</small>
+                                                    )}
                                                 </div>
 
                                                 {order.payment_method === 'cod' ? (

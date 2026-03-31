@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Container, Row, Col, Form, Button, Card } from 'react-bootstrap';
-import { MapPin, Phone, Mail, Facebook, Linkedin, Instagram } from 'lucide-react';
+import { MapPin, Phone, Mail, Facebook, Linkedin, Instagram, Clock } from 'lucide-react';
 import RevealOnScroll from '../components/RevealOnScroll';
 import { useForm } from 'react-hook-form';
 import { supabase } from '../lib/supabase';
@@ -79,7 +79,13 @@ const Contact = () => {
                                             <Phone className="me-3 flex-shrink-0" color="#22c55e" />
                                             <div>
                                                 <h6 className="fw-bold mb-1">Phone</h6>
-                                                <p className="mb-0 text-white-50 small">+91 9876543210</p>
+                                                <p className="mb-0 text-white-50 small">+91 9421008649</p>
+                                                <div className="mt-2">
+                                                    <span className="badge rounded-pill bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-2 py-1" style={{ fontSize: '0.65rem', letterSpacing: '0.5px', textTransform: 'uppercase' }}>
+                                                        <Clock size={10} className="me-1" style={{ marginTop: '-2px' }} />
+                                                        Office Hours: 11:30 AM - 8:00 PM
+                                                    </span>
+                                                </div>
                                             </div>
                                         </div>
 
