@@ -6,7 +6,9 @@ import { useForm } from 'react-hook-form';
 import { supabase } from '../lib/supabase';
 
 const Contact = () => {
-    const { register, handleSubmit, reset } = useForm();
+    const { register, handleSubmit, reset, formState: { errors, isValid } } = useForm({
+        mode: "onChange"
+    });
     const [submitted, setSubmitted] = useState(false);
 
     const onSubmit = async (data) => {
@@ -85,7 +87,7 @@ const Contact = () => {
                                             <Mail className="me-3 flex-shrink-0" color="#22c55e" />
                                             <div>
                                                 <h6 className="fw-bold mb-1">Email</h6>
-                                                <p className="mb-0 text-white-50 small">contact@ecosand.com</p>
+                                                <p className="mb-0 text-white-50 small">raminnovationsolutions@gmail.com</p>
                                             </div>
                                         </div>
                                     </div>
@@ -136,34 +138,100 @@ const Contact = () => {
                                 ) : (
                                     <>
                                         <h3 className="fw-bold mb-4 text-dark">Send us a Message</h3>
-                                        <Form onSubmit={handleSubmit(onSubmit)}>
+                                        <Form onSubmit={handleSubmit(onSubmit)} noValidate>
                                             <Row className="g-3">
                                                 <Col md={6}>
                                                     <Form.Group>
                                                         <Form.Label className="small fw-bold text-secondary">Your Name</Form.Label>
-                                                        <Form.Control type="text" className="bg-light border-0 py-2" placeholder="Enter Your Name" required {...register('name')} />
+                                                        <Form.Control 
+                                                            type="text" 
+                                                            className="bg-light border-0 py-2" 
+                                                            placeholder="Enter Your Name" 
+                                                            isInvalid={!!errors.name}
+                                                            {...register('name', { 
+                                                                required: "Full name is required",
+                                                                pattern: {
+                                                                    value: /^[A-Za-z ]+$/,
+                                                                    message: "Please enter a valid name (letters only, no numbers or special characters)"
+                                                                },
+                                                                minLength: { value: 2, message: "Name must be at least 2 characters" },
+                                                                maxLength: { value: 50, message: "Name must not exceed 50 characters" }
+                                                            })} 
+                                                            onKeyDown={(e) => {
+                                                                if (!/^[A-Za-z ]+$/.test(e.key) && e.key !== 'Backspace' && e.key !== 'Tab' && e.key !== ' ') {
+                                                                    e.preventDefault();
+                                                                }
+                                                            }}
+                                                        />
+                                                        <Form.Control.Feedback type="invalid">{errors.name?.message || "Please enter a valid name (letters only, no numbers or special characters)"}</Form.Control.Feedback>
                                                     </Form.Group>
                                                 </Col>
                                                 <Col md={6}>
                                                     <Form.Group>
                                                         <Form.Label className="small fw-bold text-secondary">Phone Number</Form.Label>
-                                                        <Form.Control type="tel" className="bg-light border-0 py-2" placeholder="+91 XXXX-XXXXXX" required {...register('phone')} />
+                                                        <Form.Control 
+                                                            type="tel" 
+                                                            className="bg-light border-0 py-2" 
+                                                            placeholder="10-digit mobile number" 
+                                                            isInvalid={!!errors.phone}
+                                                            {...register('phone', { 
+                                                                required: "Phone number is required",
+                                                                pattern: { 
+                                                                    value: /^[0-9]{10}$/, 
+                                                                    message: "Please enter a valid 10-digit mobile number" 
+                                                                },
+                                                                minLength: { value: 10, message: "Must be exactly 10 digits" },
+                                                                maxLength: { value: 10, message: "Must be exactly 10 digits" }
+                                                            })} 
+                                                            onInput={(e) => {
+                                                                e.target.value = e.target.value.replace(/[^0-9]/g, '').slice(0, 10);
+                                                            }}
+                                                        />
+                                                        <Form.Control.Feedback type="invalid">{errors.phone?.message || "Please enter a valid 10-digit mobile number"}</Form.Control.Feedback>
                                                     </Form.Group>
                                                 </Col>
                                                 <Col md={12}>
                                                     <Form.Group>
                                                         <Form.Label className="small fw-bold text-secondary">Email Address</Form.Label>
-                                                        <Form.Control type="email" className="bg-light border-0 py-2" placeholder="Enter Your Email" required {...register('email')} />
+                                                        <Form.Control 
+                                                            type="email" 
+                                                            className="bg-light border-0 py-2" 
+                                                            placeholder="Enter Your Email" 
+                                                            isInvalid={!!errors.email}
+                                                            {...register('email', { 
+                                                                required: "Email is required",
+                                                                pattern: { 
+                                                                    value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i, 
+                                                                    message: "Invalid email address" 
+                                                                }
+                                                            })} 
+                                                        />
+                                                        <Form.Control.Feedback type="invalid">{errors.email?.message}</Form.Control.Feedback>
                                                     </Form.Group>
                                                 </Col>
                                                 <Col md={12}>
                                                     <Form.Group>
                                                         <Form.Label className="small fw-bold text-secondary">Message</Form.Label>
-                                                        <Form.Control as="textarea" rows={4} className="bg-light border-0 py-2" placeholder="How can we help you?" required {...register('message')} />
+                                                        <Form.Control 
+                                                            as="textarea" 
+                                                            rows={4} 
+                                                            className="bg-light border-0 py-2" 
+                                                            placeholder="How can we help you?" 
+                                                            {...register('message')} 
+                                                        />
                                                     </Form.Group>
                                                 </Col>
                                                 <Col md={12} className="mt-4">
-                                                    <Button type="submit" className="w-100 py-3 fw-bold rounded-3 shadow-sm" style={{ backgroundColor: '#0f172a', border: 'none' }}>
+                                                    <Button 
+                                                        type="submit" 
+                                                        disabled={!isValid}
+                                                        className="w-100 py-3 fw-bold rounded-3 shadow-sm" 
+                                                        style={{ 
+                                                            backgroundColor: !isValid ? '#94a3b8' : '#0f172a', 
+                                                            border: 'none',
+                                                            cursor: !isValid ? 'not-allowed' : 'pointer'
+                                                        }}
+                                                    >
                                                         Send Message
                                                     </Button>
                                                 </Col>

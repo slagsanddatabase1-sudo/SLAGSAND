@@ -10,13 +10,16 @@ import RevealOnScroll from '../components/RevealOnScroll';
 const OrderNow = () => {
     const navigate = useNavigate();
     const location = useLocation();
-    const { register, handleSubmit, watch, setValue, formState: { errors } } = useForm({
+    const { register, handleSubmit, watch, setValue, formState: { errors, isValid } } = useForm({
+        mode: "onChange",
         defaultValues: {
             pincode: location.state?.pincode || '',
             quantity: location.state?.quantity || ''
         }
     });
     const [pricing, setPricing] = useState(null);
+    const [pincodeData, setPincodeData] = useState(null);
+    const [loadingPincode, setLoadingPincode] = useState(false);
     const [loadingPrice, setLoadingPrice] = useState(false);
     const [loadingOrder, setLoadingOrder] = useState(false);
     const [error, setError] = useState(null);
@@ -43,96 +46,102 @@ const OrderNow = () => {
     const gstNumber = watch('gst_number');
     const measure = 'Ton';
 
+    // Effect 1: Fetch Pincode Details (City/State/Eligibility)
     useEffect(() => {
-        const fetchPrice = async () => {
-            if (!pincode || pincode.length < 6 || !quantity) return;
+        const fetchPincodeInfo = async () => {
+            if (!pincode || pincode.length < 6) {
+                setPincodeData(null);
+                setError(null);
+                return;
+            }
 
-            setLoadingPrice(true);
+            setLoadingPincode(true);
             setError(null);
             try {
-                setPricing(null); // Reset prev price
-
-                // Fetch from Supabase (Handling duplicates -> get latest active one)
-                const { data, error } = await supabase
+                // Fetch from Supabase
+                const { data, error: pbError } = await supabase
                     .from('pincodes')
                     .select('*')
                     .eq('pincode', pincode.trim())
-                    .eq('is_active', true) // Prefer active pincodes
+                    .eq('is_active', true)
                     .order('id', { ascending: false })
                     .limit(1);
 
-                let unitPrice = 0;
-                let pincodeData = null;
+                if (pbError) throw pbError;
 
                 if (data && data.length > 0) {
-                    pincodeData = data[0];
-
-                    // Check delivery status first
-                    const status = pincodeData.delivery_status || pincodeData.deliverystatus;
+                    const pd = data[0];
+                    const status = pd.delivery_status || pd.deliverystatus;
+                    
                     if (status === 'No Delivery') {
                         setError("Delivery not available for this pincode.");
-                        setLoadingPrice(false);
-                        return;
-                    }
-
-                    // Calculate Unit Price based on Quantity
-                    const basic = parseFloat(pincodeData.slag_basicrate) || 0;
-                    const transport = parseFloat(pincodeData.transportation_by_truck || pincodeData.transport_rate || pincodeData['transportation By truck'] || pincodeData['Transportation by truck']) || 0;
-                    const unloading = parseFloat(pincodeData.unloading_charges) || 0;
-                    const fortyVal = parseFloat(pincodeData.forty_ton_hydraulic || pincodeData.forty_ton_hydraulic_type || pincodeData['40 Ton hydrallic Type'] || pincodeData['40 Ton']) || 0;
-                    const thirtyVal = parseFloat(pincodeData.thirty_ton_hydraulic || pincodeData.thirty_ton_hydraulic_type || pincodeData['30 Ton hydrallic type'] || pincodeData['30 Ton']) || 0;
-
-                    if (quantity === '40' && fortyVal > 0) {
-                        unitPrice = basic + fortyVal;
-                    } else if (quantity === '30' && thirtyVal > 0) {
-                        unitPrice = basic + thirtyVal;
+                        setPincodeData(null);
                     } else {
-                        unitPrice = basic + transport + unloading;
-                    }
-
-                    // Auto-fill City from DB
-                    if (pincodeData.city) {
-                        setValue('city', pincodeData.city);
-                    }
-
-                    // Check if price is set for delivery-enabled pincode
-                    if (unitPrice === 0) {
-                        setError("Price not set for this pincode. Please contact support.");
-                        setLoadingPrice(false);
-                        return;
+                        setPincodeData(pd);
+                        if (pd.city) setValue('city', pd.city);
                     }
                 } else {
-                    // Fallback to External API for location if not in DB (Optional convenience)
-                    fetch(`https://api.postalpincode.in/pincode/${pincode}`)
-                        .then(res => res.json())
-                        .then(apiData => {
-                            if (apiData && apiData[0].Status === "Success") {
-                                const details = apiData[0].PostOffice[0];
-                                setValue('city', details.Block === "NA" ? details.Name : details.Block);
-                            }
-                        })
-                        .catch(err => console.error("Error fetching pincode details:", err));
+                    // External API Fallback
+                    const res = await fetch(`https://api.postalpincode.in/pincode/${pincode}`);
+                    const apiData = await res.json();
+                    
+                    if (apiData && apiData[0].Status === "Success") {
+                        const details = apiData[0].PostOffice[0];
+                        setValue('city', details.Block === "NA" ? details.Name : details.Block);
+                    }
+                    setError("Delivery not available for this pincode (Not in service area).");
+                    setPincodeData(null);
+                }
+            } catch (err) {
+                console.error(err);
+                setError('Error verifying pincode.');
+            } finally {
+                setLoadingPincode(false);
+            }
+        };
 
-                    // Pincode not found in database
-                    setError("Delivery not available for this pincode.");
-                    setLoadingPrice(false);
+        fetchPincodeInfo();
+    }, [pincode, setValue]);
+
+    // Effect 2: Calculate Pricing
+    useEffect(() => {
+        const calculatePrice = () => {
+            if (!pincodeData || !quantity) {
+                setPricing(null);
+                return;
+            }
+
+            setLoadingPrice(true);
+            try {
+                // Calculate Unit Price
+                const basic = parseFloat(pincodeData.slag_basicrate) || 0;
+                const transport = parseFloat(pincodeData.transportation_by_truck || pincodeData.transport_rate || pincodeData['transportation By truck'] || pincodeData['Transportation by truck']) || 0;
+                const unloading = parseFloat(pincodeData.unloading_charges) || 0;
+                const fortyVal = parseFloat(pincodeData.forty_ton_hydraulic || pincodeData.forty_ton_hydraulic_type || pincodeData['40 Ton hydrallic Type'] || pincodeData['40 Ton']) || 0;
+                const thirtyVal = parseFloat(pincodeData.thirty_ton_hydraulic || pincodeData.thirty_ton_hydraulic_type || pincodeData['30 Ton hydrallic type'] || pincodeData['30 Ton']) || 0;
+
+                let unitPrice = 0;
+                if (quantity === '40' && fortyVal > 0) {
+                    unitPrice = basic + fortyVal;
+                } else if (quantity === '30' && thirtyVal > 0) {
+                    unitPrice = basic + thirtyVal;
+                } else {
+                    unitPrice = basic + transport + unloading;
+                }
+
+                if (unitPrice === 0) {
+                    setPricing(null);
                     return;
                 }
 
-                // Calculate Basis
                 const qtyNum = parseFloat(quantity);
                 const basePrice = unitPrice * qtyNum;
 
-                // GST Calculation (5% Global)
-                // Determine Split: Integrated or Split
+                // GST
                 let gstRate = 0.05;
                 let isIgst = true;
-
                 if (gstNumber && gstNumber.length >= 2) {
-                    const userStateCode = gstNumber.substring(0, 2);
-                    if (userStateCode === OUR_STATE_CODE) {
-                        isIgst = false; // CGST + SGST
-                    }
+                    if (gstNumber.substring(0, 2) === OUR_STATE_CODE) isIgst = false;
                 }
 
                 const gstAmount = basePrice * gstRate;
@@ -146,18 +155,15 @@ const OrderNow = () => {
                     isIgst,
                     gstRate
                 });
-
             } catch (err) {
                 console.error(err);
-                setError('Error calculating price.');
             } finally {
                 setLoadingPrice(false);
             }
         };
 
-        // Debounce
-        fetchPrice();
-    }, [pincode, quantity, gstNumber, setValue]);
+        calculatePrice();
+    }, [pincodeData, quantity, gstNumber]);
 
     // Removed the separate useEffect for API calls to avoid overwriting DB data
     // The fallback API call is now integrated above.
@@ -278,7 +284,7 @@ const OrderNow = () => {
             </div>
 
             <Container className="pb-5">
-                <Form onSubmit={handleSubmit(onFormSubmit)}>
+                <Form onSubmit={handleSubmit(onFormSubmit)} noValidate>
                     <Row className="justify-content-center g-4">
                         {/* Form Section */}
                         <Col lg={7}>
@@ -299,31 +305,97 @@ const OrderNow = () => {
                                             <Col md={12}>
                                                 <Form.Group>
                                                     <Form.Label className="small fw-bold text-secondary">Full Name</Form.Label>
-                                                    <Form.Control type="text" className="bg-light border-0 py-2" placeholder="Enter your full name" required {...register('name')} />
+                                                    <Form.Control 
+                                                        type="text" 
+                                                        className="bg-light border-0 py-2" 
+                                                        placeholder="Enter your full name" 
+                                                        isInvalid={!!errors.name}
+                                                        {...register('name', { 
+                                                            required: "Full name is required",
+                                                            pattern: {
+                                                                value: /^[A-Za-z ]+$/,
+                                                                message: "Please enter a valid name (letters only, no numbers or special characters)"
+                                                            },
+                                                            minLength: { value: 2, message: "Name must be at least 2 characters" },
+                                                            maxLength: { value: 50, message: "Name must not exceed 50 characters" }
+                                                        })} 
+                                                        onKeyDown={(e) => {
+                                                            if (!/^[A-Za-z ]+$/.test(e.key) && e.key !== 'Backspace' && e.key !== 'Tab' && e.key !== ' ') {
+                                                                e.preventDefault();
+                                                            }
+                                                        }}
+                                                    />
+                                                    <Form.Control.Feedback type="invalid">{errors.name?.message || "Please enter a valid name (letters only, no numbers or special characters)"}</Form.Control.Feedback>
                                                 </Form.Group>
                                             </Col>
                                             <Col md={6}>
                                                 <Form.Group>
                                                     <Form.Label className="small fw-bold text-secondary">Contact Number</Form.Label>
-                                                    <Form.Control type="tel" className="bg-light border-0 py-2" placeholder="+91 XXXXXXXXXX" required {...register('contact')} />
+                                                    <Form.Control 
+                                                        type="tel" 
+                                                        className="bg-light border-0 py-2" 
+                                                        placeholder="10-digit mobile number" 
+                                                        isInvalid={!!errors.contact}
+                                                        {...register('contact', { 
+                                                            required: "Phone number is required",
+                                                            pattern: { 
+                                                                value: /^[0-9]{10}$/, 
+                                                                message: "Please enter a valid 10-digit mobile number" 
+                                                            },
+                                                            minLength: { value: 10, message: "Must be exactly 10 digits" },
+                                                            maxLength: { value: 10, message: "Must be exactly 10 digits" }
+                                                        })} 
+                                                        onInput={(e) => {
+                                                            e.target.value = e.target.value.replace(/[^0-9]/g, '').slice(0, 10);
+                                                        }}
+                                                    />
+                                                    <Form.Control.Feedback type="invalid">{errors.contact?.message || "Please enter a valid 10-digit mobile number"}</Form.Control.Feedback>
                                                 </Form.Group>
                                             </Col>
                                             <Col md={6}>
                                                 <Form.Group>
                                                     <Form.Label className="small fw-bold text-secondary">Pincode</Form.Label>
-                                                    <Form.Control type="text" className="bg-light border-0 py-2" placeholder="Enter your pincode" required {...register('pincode')} />
+                                                    <Form.Control 
+                                                        type="text" 
+                                                        className="bg-light border-0 py-2" 
+                                                        placeholder="Enter your pincode" 
+                                                        isInvalid={!!errors.pincode}
+                                                        {...register('pincode', { 
+                                                            required: "Pincode is required",
+                                                            pattern: { value: /^[0-9]{6}$/, message: "Pincode must be 6 digits" }
+                                                        })} 
+                                                    />
+                                                    <Form.Control.Feedback type="invalid">{errors.pincode?.message}</Form.Control.Feedback>
                                                 </Form.Group>
                                             </Col>
                                             <Col md={6}>
                                                 <Form.Group>
                                                     <Form.Label className="small fw-bold text-secondary">City</Form.Label>
-                                                    <Form.Control type="text" className="bg-light border-0 py-2" placeholder="Enter your city" required {...register('city')} />
+                                                    <Form.Control 
+                                                        type="text" 
+                                                        className="bg-light border-0 py-2" 
+                                                        placeholder="Enter your city" 
+                                                        isInvalid={!!errors.city}
+                                                        {...register('city', { required: "City is required" })} 
+                                                    />
+                                                    <Form.Control.Feedback type="invalid">{errors.city?.message}</Form.Control.Feedback>
                                                 </Form.Group>
                                             </Col>
                                             <Col md={12}>
                                                 <Form.Group>
                                                     <Form.Label className="small fw-bold text-secondary"> Address</Form.Label>
-                                                    <Form.Control as="textarea" rows={3} className="bg-light border-0 py-2" placeholder="Enter your address" required {...register('address')} />
+                                                    <Form.Control 
+                                                        as="textarea" 
+                                                        rows={3} 
+                                                        className="bg-light border-0 py-2" 
+                                                        placeholder="Enter your address" 
+                                                        isInvalid={!!errors.address}
+                                                        {...register('address', { 
+                                                            required: "Address is required",
+                                                            minLength: { value: 10, message: "Please provide complete address" }
+                                                        })} 
+                                                    />
+                                                    <Form.Control.Feedback type="invalid">{errors.address?.message}</Form.Control.Feedback>
                                                 </Form.Group>
                                             </Col>
                                         </Row>
@@ -352,9 +424,17 @@ const OrderNow = () => {
                                                             type="text"
                                                             className="border-0 py-2"
                                                             placeholder="Ex: 27ABCDE1234F1Z5"
-                                                            {...register('gst_number')}
+                                                            isInvalid={!!errors.gst_number}
+                                                            {...register('gst_number', {
+                                                                required: isBusiness ? "GST number is required for business orders" : false,
+                                                                pattern: { 
+                                                                    value: /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/, 
+                                                                    message: "Please enter a valid 15-digit GSTIN" 
+                                                                }
+                                                            })}
                                                             style={{ textTransform: 'uppercase' }}
                                                         />
+                                                        <Form.Control.Feedback type="invalid">{errors.gst_number?.message}</Form.Control.Feedback>
                                                         <Form.Text className="text-muted x-small">
                                                             Enter valid 15-digit GSTIN. Tax will be calculated based on state code (first 2 digits).
                                                         </Form.Text>
@@ -529,9 +609,13 @@ const OrderNow = () => {
                                                     variant="dark"
                                                     size="lg"
                                                     type="submit"
-                                                    disabled={loadingOrder || !pricing || !!error}
+                                                    disabled={loadingOrder || !pricing || !!error || !isValid}
                                                     className="w-100 py-3 rounded-3 shadow-lg fw-bold d-flex align-items-center justify-content-center gap-2"
-                                                    style={{ backgroundColor: '#0f172a' }}
+                                                    style={{ 
+                                                        backgroundColor: (!pricing || !!error || !isValid) ? '#94a3b8' : '#0f172a',
+                                                        cursor: (!pricing || !!error || !isValid) ? 'not-allowed' : 'pointer',
+                                                        border: 'none'
+                                                    }}
                                                 >
                                                     {loadingOrder ? <Spinner animation="border" size="sm" /> : (paymentMethod === 'online' ? 'Pay Securely' : 'Place Order')}
                                                 </Button>

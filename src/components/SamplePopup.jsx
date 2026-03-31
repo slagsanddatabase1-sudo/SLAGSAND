@@ -7,7 +7,9 @@ import { Form, Button, Container, Row, Col, Spinner } from 'react-bootstrap';
 
 const SamplePopup = ({ isOpen, onClose }) => {
     const navigate = useNavigate();
-    const { register, handleSubmit, reset, setValue } = useForm();
+    const { register, handleSubmit, reset, setValue, formState: { errors, isValid } } = useForm({
+        mode: "onChange"
+    });
     const [submitted, setSubmitted] = useState(false);
     const [loading, setLoading] = useState(false);
 
@@ -193,7 +195,7 @@ const SamplePopup = ({ isOpen, onClose }) => {
                                     </Button>
                                 </div>
                             ) : (
-                                <Form onSubmit={handleSubmit(onSubmit)}>
+                                <Form onSubmit={handleSubmit(onSubmit)} noValidate>
                                     <Row className="g-3">
                                         <Col md={6}>
                                             <Form.Group className="mb-3">
@@ -202,9 +204,23 @@ const SamplePopup = ({ isOpen, onClose }) => {
                                                     type="text"
                                                     placeholder="Your Name"
                                                     className="bg-light border-0 py-2"
-                                                    required
-                                                    {...register("name")}
+                                                    isInvalid={!!errors.name}
+                                                    {...register("name", { 
+                                                        required: "Full name is required",
+                                                        pattern: {
+                                                            value: /^[A-Za-z ]+$/,
+                                                            message: "Please enter a valid name (letters only, no numbers or special characters)"
+                                                        },
+                                                        minLength: { value: 2, message: "Name must be at least 2 characters" },
+                                                        maxLength: { value: 50, message: "Name must not exceed 50 characters" }
+                                                    })}
+                                                    onKeyDown={(e) => {
+                                                        if (!/^[A-Za-z ]+$/.test(e.key) && e.key !== 'Backspace' && e.key !== 'Tab' && e.key !== ' ') {
+                                                            e.preventDefault();
+                                                        }
+                                                    }}
                                                 />
+                                                <Form.Control.Feedback type="invalid">{errors.name?.message || "Please enter a valid name (letters only, no numbers or special characters)"}</Form.Control.Feedback>
                                             </Form.Group>
                                         </Col>
                                         <Col md={6}>
@@ -212,11 +228,23 @@ const SamplePopup = ({ isOpen, onClose }) => {
                                                 <Form.Label className="fw-semibold small text-muted mb-1">Phone Number</Form.Label>
                                                 <Form.Control
                                                     type="tel"
-                                                    placeholder="+91 XXXXX XXXXX"
+                                                    placeholder="10-digit mobile number"
                                                     className="bg-light border-0 py-2"
-                                                    required
-                                                    {...register("contact")}
+                                                    isInvalid={!!errors.contact}
+                                                    {...register("contact", { 
+                                                        required: "Phone number is required",
+                                                        pattern: { 
+                                                            value: /^[0-9]{10}$/, 
+                                                            message: "Please enter a valid 10-digit mobile number" 
+                                                        },
+                                                        minLength: { value: 10, message: "Must be exactly 10 digits" },
+                                                        maxLength: { value: 10, message: "Must be exactly 10 digits" }
+                                                    })}
+                                                    onInput={(e) => {
+                                                        e.target.value = e.target.value.replace(/[^0-9]/g, '').slice(0, 10);
+                                                    }}
                                                 />
+                                                <Form.Control.Feedback type="invalid">{errors.contact?.message || "Please enter a valid 10-digit mobile number"}</Form.Control.Feedback>
                                             </Form.Group>
                                         </Col>
                                     </Row>
@@ -229,9 +257,13 @@ const SamplePopup = ({ isOpen, onClose }) => {
                                             placeholder="House No, Street, Landmark"
                                             className="bg-light border-0 py-2"
                                             style={{ resize: 'none' }}
-                                            required
-                                            {...register("address")}
+                                            isInvalid={!!errors.address}
+                                            {...register("address", { 
+                                                required: "Delivery address is required",
+                                                minLength: { value: 10, message: "Please provide a complete address" }
+                                            })}
                                         />
+                                        <Form.Control.Feedback type="invalid">{errors.address?.message}</Form.Control.Feedback>
                                     </Form.Group>
 
                                     <Row className="g-3">
@@ -242,8 +274,10 @@ const SamplePopup = ({ isOpen, onClose }) => {
                                                     type="text"
                                                     className="bg-light border-0 py-2"
                                                     maxLength={6}
-                                                    required
+                                                    isInvalid={!!errors.pincode}
                                                     {...register("pincode", {
+                                                        required: "Pincode is required",
+                                                        pattern: { value: /^[0-9]{6}$/, message: "Pincode must be 6 digits" },
                                                         onChange: (e) => {
                                                             if (e.target.value.length === 6) {
                                                                 fetchPincodeDetails(e.target.value);
@@ -254,6 +288,7 @@ const SamplePopup = ({ isOpen, onClose }) => {
                                                         }
                                                     })}
                                                 />
+                                                <Form.Control.Feedback type="invalid">{errors.pincode?.message}</Form.Control.Feedback>
                                             </Form.Group>
                                         </Col>
                                         <Col md={4}>
@@ -262,8 +297,10 @@ const SamplePopup = ({ isOpen, onClose }) => {
                                                 <Form.Control
                                                     type="text"
                                                     className="bg-light border-0 py-2"
-                                                    {...register("city")}
+                                                    isInvalid={!!errors.city}
+                                                    {...register("city", { required: "City is required" })}
                                                 />
+                                                <Form.Control.Feedback type="invalid">{errors.city?.message}</Form.Control.Feedback>
                                             </Form.Group>
                                         </Col>
                                         <Col md={4}>
@@ -282,20 +319,28 @@ const SamplePopup = ({ isOpen, onClose }) => {
                                         <Form.Label className="fw-semibold small text-muted mb-1">Sample Pack Size</Form.Label>
                                         <Form.Select
                                             className="bg-light border-0 py-2"
-                                            {...register("quantity")}
+                                            isInvalid={!!errors.quantity}
+                                            {...register("quantity", { required: "Please select a pack size" })}
                                         >
                                             <option value="">Select Pack Size</option>
                                             <option value="500g - ₹49">500g Pack – ₹49 (Shipping Only)</option>
                                             <option value="1Kg - ₹99">1Kg Pack – ₹99 (Shipping Only)</option>
                                             <option value="5Kg - ₹199">5Kg Pack – ₹199 (Shipping Only)</option>
                                         </Form.Select>
+                                        <Form.Control.Feedback type="invalid">{errors.quantity?.message}</Form.Control.Feedback>
                                     </Form.Group>
 
                                     <Button
                                         type="submit"
-                                        disabled={loading}
+                                        disabled={loading || !isValid}
                                         className="w-100 py-3 fw-bold text-uppercase tracking-wide shadow-sm d-flex align-items-center justify-content-center"
-                                        style={{ backgroundColor: '#0f172a', border: 'none', borderRadius: '40px', fontSize: '1rem' }}
+                                        style={{ 
+                                            backgroundColor: !isValid ? '#94a3b8' : '#0f172a', 
+                                            border: 'none', 
+                                            borderRadius: '40px', 
+                                            fontSize: '1rem',
+                                            cursor: !isValid ? 'not-allowed' : 'pointer'
+                                        }}
                                     >
                                         {loading ? <Spinner animation="border" size="sm" /> : 'Proceed to Pay & Order'}
                                     </Button>

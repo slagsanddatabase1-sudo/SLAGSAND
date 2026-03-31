@@ -8,6 +8,7 @@ import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar'; // Added Navbar import
 import RevealOnScroll from '../components/RevealOnScroll'; // Added RevealOnScroll import
+import EconomicCalculator from '../components/EconomicCalculator';
 
 
 const TypewriterText = ({ text, speed = 50 }) => {
@@ -413,6 +414,8 @@ const Home = () => {
                     </RevealOnScroll>
                 </Container>
             </section>
+
+
 
             {/* 3. Technical Specifications Section */}
             <section className="py-5 position-relative" style={{ overflow: 'hidden' }}>
