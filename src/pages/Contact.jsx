@@ -103,9 +103,9 @@ const Contact = () => {
                                     <div>
                                         <h6 className="mb-3 fw-bold">Follow Us</h6>
                                         <div className="d-flex gap-2">
-                                            <Button variant="outline-light" className="rounded-circle p-2 border-opacity-25" style={{ width: '40px', height: '40px' }} href="https://facebook.com" target="_blank"><Facebook size={18} /></Button>
-                                            <Button variant="outline-light" className="rounded-circle p-2 border-opacity-25" style={{ width: '40px', height: '40px' }} href="https://instagram.com" target="_blank"><Instagram size={18} /></Button>
-                                            <Button variant="outline-light" className="rounded-circle p-2 border-opacity-25" style={{ width: '40px', height: '40px' }} href="https://linkedin.com" target="_blank"><Linkedin size={18} /></Button>
+                                            <Button variant="outline-light" className="rounded-circle p-2 border-opacity-25" style={{ width: '40px', height: '40px' }} href="#" target="_blank"><Facebook size={18} /></Button>
+                                            <Button variant="outline-light" className="rounded-circle p-2 border-opacity-25" style={{ width: '40px', height: '40px' }} href="#" target="_blank"><Instagram size={18} /></Button>
+                                            <Button variant="outline-light" className="rounded-circle p-2 border-opacity-25" style={{ width: '40px', height: '40px' }} href="#" target="_blank"><Linkedin size={18} /></Button>
                                         </div>
                                     </div>
                                     
