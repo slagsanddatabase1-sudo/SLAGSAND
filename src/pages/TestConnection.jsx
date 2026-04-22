@@ -50,9 +50,9 @@ const TestConnection = () => {
             }
 
             // 4. Test Backend
-            addLog('Testing Backend Connection (/api)...');
-            const baseURL = import.meta.env.VITE_API_BASE_URL || '';
-            const backendRes = await fetch(`${baseURL}/api`);
+            addLog('Testing Backend Connection (/api/health)...');
+            const baseURL = import.meta.env.VITE_API_BASE_URL || 'https://slagsand.onrender.com';
+            const backendRes = await fetch(`${baseURL}/api/health`);
             if (backendRes.ok) {
                 const text = await backendRes.text();
                 addLog(`✅ Backend Reachable: ${text}`);

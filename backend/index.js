@@ -29,7 +29,7 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
-const allowedOriginPattern = /^https:\/\/.*\.vercel\.app$/;
+const allowedOriginPattern = /^(https:\/\/.*\.vercel\.app|https:\/\/.*\.onrender\.com)$/;
 const allowedOrigins = [
     "http://localhost:5173",
     "http://localhost:4173"
@@ -38,7 +38,7 @@ app.use(cors({
     origin: (origin, callback) => {
         // Allow requests with no origin (e.g. Postman, curl, Render health checks)
         if (!origin) return callback(null, true);
-        // Allow any *.vercel.app subdomain or explicit localhost origins
+        // Allow any *.vercel.app or *.onrender.com subdomain or explicit localhost origins
         if (allowedOriginPattern.test(origin) || allowedOrigins.includes(origin)) {
             callback(null, true);
         } else {
@@ -58,6 +58,11 @@ const razorpay = new Razorpay({
 app.use((req, res, next) => {
     console.log(`📥 ${req.method} ${req.path}`);
     next();
+});
+
+// Root endpoint
+app.get("/", (req, res) => {
+    res.send("Running!");
 });
 
 // Health check endpoint (renamed to avoid conflict with frontend)
