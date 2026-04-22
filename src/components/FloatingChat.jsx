@@ -130,13 +130,13 @@ const FloatingChat = () => {
             <style>
                 {`
                 .floating-chat-container {
-                    bottom: 0;
+                    bottom: 40px;
                     right: 0;
                 }
                 @media (max-width: 576px) {
                     .floating-chat-container {
-                        bottom: 20px !important; /* Settled at bottom on mobile */
-                        padding-right: 1rem !important; /* Adjust horizontal spacing if needed */
+                        bottom: 45px !important; /* Adjusted for mobile sticky footer */
+                        padding-right: 1rem !important;
                     }
                 }
                 @keyframes bounceHorizontal {

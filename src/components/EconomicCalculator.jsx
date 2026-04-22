@@ -50,7 +50,10 @@ const EconomicCalculator = () => {
                     'calc_sqft_density'
                 ]);
 
-            if (error) throw error;
+            if (error) {
+                console.warn('⚠️ Could not fetch dynamic rates from Supabase. Using default rates fallback.', error.message);
+                return;
+            }
 
             if (data && data.length > 0) {
                 const configs = {};

@@ -13,8 +13,8 @@ const Footer = () => {
 
     return (
         <footer
-            className="pt-4 pb-2"
-            style={{ backgroundColor: 'rgba(140, 124, 124, 0.17)', color: '#1f2937' }}
+            className="pt-4"
+            style={{ backgroundColor: 'rgba(140, 124, 124, 0.17)', color: '#1f2937', paddingBottom: '80px' }}
         >
             <Container>
                 {/* MOBILE → 2 COLUMNS | TABLET & DESKTOP → NORMAL */}
@@ -82,14 +82,27 @@ const Footer = () => {
 
                 </Row>
 
-                {/* Bottom Line */}
-                <div className="mt-4 pt-3 text-center border-top border-secondary border-opacity-25 small fw-bold text-secondary">
-                    <p className="mb-0">
-                        &copy; {new Date().getFullYear()} Designed and Developed By{' '}
-                        <a href="https://saturnxdigital.com" target="_blank" rel="noopener noreferrer" style={{ color: '#1a237e', textDecoration: 'none', cursor: 'pointer' }}>SaturnX Digital Solutions</a>
-                    </p>
-                </div>
             </Container>
+
+            {/* Sticky Credit Line */}
+            <div 
+                className="text-center small fw-bold text-secondary py-2"
+                style={{ 
+                    position: 'fixed', 
+                    bottom: 0, 
+                    left: 0, 
+                    right: 0, 
+                    backgroundColor: '#ffffffbe',
+                    boxShadow: '0 -2px 10px rgba(0,0,0,0.05)',
+                    borderTop: '1px solid rgba(0,0,0,0.1)',
+                    zIndex: 999 
+                }}
+            >
+                <p className="mb-0 px-3">
+                    &copy; {new Date().getFullYear()} Designed and Developed By{' '}
+                    <a href="https://saturnxdigital.com" target="_blank" rel="noopener noreferrer" style={{ color: '#1a237e', textDecoration: 'none', cursor: 'pointer' }}>SaturnX Digital Solutions</a>
+                </p>
+            </div>
         </footer>
     );
 };
