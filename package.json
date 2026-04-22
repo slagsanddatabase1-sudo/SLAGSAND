@@ -3,6 +3,7 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
+  "main": "index.html",
   "scripts": {
     "dev": "concurrently \"npm run server\" \"npm run client\"",
     "server": "cd backend && npm run dev",
@@ -25,11 +26,7 @@
     "react-bootstrap-icons": "^1.11.6",
     "react-dom": "^19.2.0",
     "react-hook-form": "^7.68.0",
-    "react-router-dom": "^7.10.1",
-    "express": "^5.2.1",
-    "cors": "^2.8.5",
-    "razorpay": "^2.9.6",
-    "dotenv": "^17.2.3"
+    "react-router-dom": "^7.10.1"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.1",
