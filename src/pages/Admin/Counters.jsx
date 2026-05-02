@@ -1,14 +1,27 @@
 import React, { useState, useEffect } from 'react';
 import { Container, Table, Button, Form, Modal, Spinner } from 'react-bootstrap';
 import { supabase } from '../../lib/supabase';
+import { useOutletContext } from 'react-router-dom';
 import { Save, Hash, ArrowUpRight, Edit, RotateCcw } from 'lucide-react';
 
 const Counters = () => {
+    const { userRole } = useOutletContext();
     const [counters, setCounters] = useState([]);
     const [loading, setLoading] = useState(true);
     const [editingKey, setEditingKey] = useState(null);
     const [editValue, setEditValue] = useState('');
     const [updating, setUpdating] = useState(false);
+
+    if (userRole === 'staff') {
+        return (
+            <Container className="p-5 text-center">
+                <div className="bg-white p-5 rounded-4 shadow-sm border">
+                    <h3 className="text-danger fw-bold">Access Denied</h3>
+                    <p className="text-muted">You do not have permission to manage achievements. Contact your administrator.</p>
+                </div>
+            </Container>
+        );
+    }
 
     useEffect(() => {
         fetchCounters();

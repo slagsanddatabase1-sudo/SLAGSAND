@@ -1,14 +1,27 @@
 import React, { useState, useEffect } from 'react';
 import { Container, Table, Button, Form, Modal, Spinner } from 'react-bootstrap';
 import { supabase } from '../../lib/supabase';
+import { useOutletContext } from 'react-router-dom';
 import { Plus, Trash2, Edit } from 'lucide-react';
 
 const FAQs = () => {
+    const { userRole } = useOutletContext();
     const [faqs, setFaqs] = useState([]);
     const [loading, setLoading] = useState(true);
     const [showModal, setShowModal] = useState(false);
     const [formData, setFormData] = useState({ question: '', answer: '', priority: 0 });
     const [editingId, setEditingId] = useState(null);
+
+    if (userRole === 'staff') {
+        return (
+            <Container className="p-5 text-center">
+                <div className="bg-white p-5 rounded-4 shadow-sm border">
+                    <h3 className="text-danger fw-bold">Access Denied</h3>
+                    <p className="text-muted">You do not have permission to view this page. Contact your administrator.</p>
+                </div>
+            </Container>
+        );
+    }
 
     useEffect(() => {
         fetchFaqs();

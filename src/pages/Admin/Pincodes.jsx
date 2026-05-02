@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Container, Table, Button, Badge, Spinner, Modal, Form, Row, Col, Alert, Tabs, Tab, Card } from 'react-bootstrap';
 import { supabase } from '../../lib/supabase';
+import { useOutletContext } from 'react-router-dom';
 import { MapPin, Plus, Edit2, Trash2, Upload, Download, Search, ToggleLeft, ToggleRight, Info, ChevronLeft, ChevronRight, Calculator } from 'lucide-react';
 import Papa from 'papaparse';
 
 const Pincodes = () => {
+    const { userRole } = useOutletContext();
     const [pincodes, setPincodes] = useState([]);
     const [filteredPincodes, setFilteredPincodes] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -523,19 +525,28 @@ const Pincodes = () => {
                     </div>
                 </div>
                 <div className="d-flex flex-wrap gap-2 justify-content-start justify-content-md-end">
-                    <Button variant="outline-danger" size="sm" onClick={handleDeleteAll} className="px-3">
-                        <Trash2 size={16} className="me-1" /> Delete All
-                    </Button>
-                    <Button variant="outline-success" size="sm" onClick={handleCSVExport} className="px-3">
-                        <Download size={16} className="me-1" /> Export
-                    </Button>
-                    <Button variant="outline-primary" size="sm" as="label" style={{ cursor: 'pointer' }} className="px-3">
-                        <Upload size={16} className="me-1" /> Import
-                        <input type="file" accept=".csv" onChange={handleCSVImport} style={{ display: 'none' }} />
-                    </Button>
-                    <Button variant="primary" size="sm" onClick={() => handleOpenModal()} className="px-3">
-                        <Plus size={16} className="me-1" /> Add New
-                    </Button>
+                    {(userRole === 'admin' || userRole === 'executive') && (
+                        <>
+                            <Button variant="outline-danger" size="sm" onClick={handleDeleteAll} className="px-3">
+                                <Trash2 size={16} className="me-1" /> Delete All
+                            </Button>
+                            <Button variant="outline-success" size="sm" onClick={handleCSVExport} className="px-3">
+                                <Download size={16} className="me-1" /> Export
+                            </Button>
+                            <Button variant="outline-primary" size="sm" as="label" style={{ cursor: 'pointer' }} className="px-3">
+                                <Upload size={16} className="me-1" /> Import
+                                <input type="file" accept=".csv" onChange={handleCSVImport} style={{ display: 'none' }} />
+                            </Button>
+                            <Button variant="primary" size="sm" onClick={() => handleOpenModal()} className="px-3">
+                                <Plus size={16} className="me-1" /> Add New
+                            </Button>
+                        </>
+                    )}
+                    {userRole === 'staff' && (
+                        <Button variant="outline-success" size="sm" onClick={handleCSVExport} className="px-3">
+                            <Download size={16} className="me-1" /> Export List
+                        </Button>
+                    )}
                 </div>
             </div>
 
@@ -606,8 +617,9 @@ const Pincodes = () => {
                                         className="small fw-bold cursor-pointer"
                                     />
                                 </div>
-                                <Button variant="dark" size="sm" onClick={handleGlobalUpdate} disabled={loading} className="w-100 py-2 fw-bold">
+                                <Button variant="dark" size="sm" onClick={handleGlobalUpdate} disabled={loading || userRole === 'staff'} className="w-100 py-2 fw-bold">
                                     {loading ? <Spinner animation="border" size="sm" /> : 
+                                     userRole === 'staff' ? 'Updating pricing restricted' :
                                      updateTarget === 'all' ? 'Apply to ALL Pincodes & Recalculate' : 
                                      `Apply to ${selectedIds.length} Selected Pincodes & Recalculate`}
                                 </Button>
@@ -690,7 +702,9 @@ const Pincodes = () => {
                                     <th className="border-0 font-weight-bold text-end">30 Ton</th>
                                     <th className="border-0 font-weight-bold text-end">Final Price</th>
                                     <th className="border-0 font-weight-bold text-center">Active</th>
-                                    <th className="border-0 font-weight-bold text-end">Actions</th>
+                                    {(userRole === 'admin' || userRole === 'executive') && (
+                                        <th className="border-0 font-weight-bold text-end">Actions</th>
+                                    )}
                                 </tr>
                             </thead>
                             <tbody>
@@ -754,21 +768,24 @@ const Pincodes = () => {
                                                     type="switch"
                                                     id={`switch-${p.id}`}
                                                     checked={p.is_active}
+                                                    disabled={userRole === 'staff'}
                                                     onChange={() => handleToggleActive(p.id, p.is_active)}
                                                 />
                                             </td>
-                                            <td className="text-end">
-                                                <Button variant="link" size="sm" className="me-2 text-primary p-0" onClick={() => handleOpenModal(p)}>
-                                                    <Edit2 size={16} />
-                                                </Button>
-                                                <Button variant="link" size="sm" className="text-danger p-0" onClick={() => {
-                                                    if (window.confirm('Are you sure you want to delete this pincode?')) {
-                                                        handleDelete(p.id);
-                                                    }
-                                                }}>
-                                                    <Trash2 size={16} />
-                                                </Button>
-                                            </td>
+                                            {(userRole === 'admin' || userRole === 'executive') && (
+                                                <td className="text-end">
+                                                    <Button variant="link" size="sm" className="me-2 text-primary p-0" onClick={() => handleOpenModal(p)}>
+                                                        <Edit2 size={16} />
+                                                    </Button>
+                                                    <Button variant="link" size="sm" className="text-danger p-0" onClick={() => {
+                                                        if (window.confirm('Are you sure you want to delete this pincode?')) {
+                                                            handleDelete(p.id);
+                                                        }
+                                                    }}>
+                                                        <Trash2 size={16} />
+                                                    </Button>
+                                                </td>
+                                            )}
                                         </tr>
                                     ))
                                 ) : (

@@ -117,32 +117,30 @@ const AdminLayout = () => {
 
                 <div className="py-4 overflow-auto h-100 pb-5">
 
-                    {/* Dashboard - Visible to Admin & Executive */}
-                    {(userRole === 'admin' || userRole === 'executive' || userRole === 'staff') && (
-                        <>
-                            <small className="text-uppercase text-muted fw-bold px-4 mb-2 d-block" style={{ fontSize: '0.7rem', letterSpacing: '0.5px' }}>Overview</small>
-                            <Nav className="flex-column mb-4">
-                                <NavItem to="/admin" icon={LayoutDashboard} label="Dashboard" />
-                            </Nav>
-                        </>
-                    )}
-
+                    {/* Dashboard - Visible to all roles but potentially with different views handled inside */}
+                    <small className="text-uppercase text-muted fw-bold px-4 mb-2 d-block" style={{ fontSize: '0.7rem', letterSpacing: '0.5px' }}>Overview</small>
+                    <Nav className="flex-column mb-4">
+                        <NavItem to="/admin" icon={LayoutDashboard} label="Dashboard" />
+                    </Nav>
+                    
                     <small className="text-uppercase text-muted fw-bold px-4 mb-2 d-block" style={{ fontSize: '0.7rem', letterSpacing: '0.5px' }}>Management</small>
                     <Nav className="flex-column mb-4">
                         <NavItem to="/admin/orders" icon={ShoppingBag} label="Orders" />
                         <NavItem to="/admin/inquiries" icon={MessageSquare} label="Inquiries" />
+                        
                         {/* Marketers - Admin & Executive only */}
-                        {(userRole === 'admin' || userRole === 'executive' || userRole === 'staff') && (
+                        {(userRole === 'admin' || userRole === 'executive') && (
                             <NavItem to="/admin/marketers" icon={Users} label="Marketers" />
                         )}
-                        {/* Users - Admin Only */}
+                        
+                        {/* User Roles - Admin Only (Super Admin) */}
                         {userRole === 'admin' && (
                             <NavItem to="/admin/users" icon={Users} label="User Roles" />
                         )}
                     </Nav>
-
+                    
                     {/* Content - Admin & Executive only */}
-                    {(userRole === 'admin' || userRole === 'executive' || userRole === 'staff') && (
+                    {(userRole === 'admin' || userRole === 'executive') && (
                         <>
                             <small className="text-uppercase text-muted fw-bold px-4 mb-2 d-block" style={{ fontSize: '0.7rem', letterSpacing: '0.5px' }}>Content</small>
                             <Nav className="flex-column mb-4">
@@ -150,6 +148,16 @@ const AdminLayout = () => {
                                 <NavItem to="/admin/testimonials" icon={Star} label="Testimonials" />
                                 <NavItem to="/admin/faqs" icon={HelpCircle} label="FAQs" />
                                 <NavItem to="/admin/achievements" icon={Hash} label="Achievements" />
+                            </Nav>
+                        </>
+                    )}
+                    
+                    {/* Staff Content - Limited set for staff role */}
+                    {userRole === 'staff' && (
+                        <>
+                            <small className="text-uppercase text-muted fw-bold px-4 mb-2 d-block" style={{ fontSize: '0.7rem', letterSpacing: '0.5px' }}>Information</small>
+                            <Nav className="flex-column mb-4">
+                                <NavItem to="/admin/pincodes" icon={MapPin} label="Pincodes" />
                             </Nav>
                         </>
                     )}

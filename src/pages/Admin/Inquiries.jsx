@@ -2,8 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { Container, Table, Badge, Spinner, Button, Modal, Row, Col } from 'react-bootstrap';
 import { supabase } from '../../lib/supabase';
 import { Eye, Mail, Phone, Calendar, Tag, Trash2 } from 'lucide-react';
+import { useOutletContext } from 'react-router-dom';
 
 const Inquiries = () => {
+    const { userRole } = useOutletContext();
     const [inquiries, setInquiries] = useState([]);
     const [loading, setLoading] = useState(true);
     const [selectedInquiry, setSelectedInquiry] = useState(null);
@@ -60,7 +62,7 @@ const Inquiries = () => {
             <div className="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
                 <h2 className="fw-bold m-0 fs-3">Inquiries & Leads</h2>
                 <div className="d-flex gap-2">
-                    {inquiries.length > 0 && (
+                    {inquiries.length > 0 && (userRole === 'admin' || userRole === 'executive') && (
                         <Button variant="outline-danger" size="sm" onClick={handleDeleteAll}>
                             <Trash2 size={16} className="me-1" /> Delete All
                         </Button>
@@ -109,9 +111,11 @@ const Inquiries = () => {
                                             <Button variant="link" className="p-0 text-primary" onClick={() => handleViewDetails(inq)}>
                                                 <Eye size={18} />
                                             </Button>
-                                            <Button variant="link" className="p-0 text-danger" onClick={() => handleDelete(inq.id)}>
-                                                <Trash2 size={18} />
-                                            </Button>
+                                            {(userRole === 'admin' || userRole === 'executive') && (
+                                                <Button variant="link" className="p-0 text-danger" onClick={() => handleDelete(inq.id)}>
+                                                    <Trash2 size={18} />
+                                                </Button>
+                                            )}
                                         </div>
                                     </td>
                                 </tr>

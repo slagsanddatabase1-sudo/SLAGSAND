@@ -2,8 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { Container, Table, Badge, Spinner, Button, Modal, Row, Col, Card, Form } from 'react-bootstrap';
 import { supabase } from '../../lib/supabase';
 import { Eye, User, ShoppingBag, MapPin, CreditCard, Calendar, Trash2, Edit } from 'lucide-react';
+import { useOutletContext } from 'react-router-dom';
 
 const Orders = () => {
+    const { userRole } = useOutletContext();
     const [orders, setOrders] = useState([]);
     const [loading, setLoading] = useState(true);
     const [selectedOrder, setSelectedOrder] = useState(null);
@@ -98,9 +100,11 @@ const Orders = () => {
             <div className="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
                 <h2 className="fw-bold m-0 fs-3">Manage Orders</h2>
                 <div className="d-flex gap-2">
-                    <Button variant="outline-danger" size="sm" onClick={handleDeleteAllOrders}>
-                        <Trash2 size={16} className="me-1" /> Delete All
-                    </Button>
+                    {(userRole === 'admin' || userRole === 'executive') && (
+                        <Button variant="outline-danger" size="sm" onClick={handleDeleteAllOrders}>
+                            <Trash2 size={16} className="me-1" /> Delete All
+                        </Button>
+                    )}
                     <Button variant="outline-primary" size="sm" onClick={fetchOrders}>Refresh Orders</Button>
                 </div>
             </div>
@@ -137,9 +141,11 @@ const Orders = () => {
                                         <div>{order.order_details.quantity} {order.order_details.measure}</div>
                                         <div className="d-flex align-items-center gap-1">
                                             <small className="text-muted">Pincode: {order.user_details.pincode}</small>
-                                            <Button variant="link" className="p-0 text-primary" onClick={() => handleEditPincode(order.user_details.pincode)}>
-                                                <Edit size={12} />
-                                            </Button>
+                                            {(userRole === 'admin' || userRole === 'executive') && (
+                                                <Button variant="link" className="p-0 text-primary" onClick={() => handleEditPincode(order.user_details.pincode)}>
+                                                    <Edit size={12} />
+                                                </Button>
+                                            )}
                                         </div>
                                     </td>
                                     <td className="fw-bold">₹{order.amount.toLocaleString()}</td>
@@ -158,9 +164,11 @@ const Orders = () => {
                                             <Button variant="link" className="p-0 text-primary" onClick={() => handleViewDetails(order)}>
                                                 <Eye size={18} />
                                             </Button>
-                                            <Button variant="link" className="p-0 text-danger" onClick={() => handleDeleteOrder(order.id)}>
-                                                <Trash2 size={18} />
-                                            </Button>
+                                            {(userRole === 'admin' || userRole === 'executive') && (
+                                                <Button variant="link" className="p-0 text-danger" onClick={() => handleDeleteOrder(order.id)}>
+                                                    <Trash2 size={18} />
+                                                </Button>
+                                            )}
                                         </div>
                                     </td>
                                 </tr>

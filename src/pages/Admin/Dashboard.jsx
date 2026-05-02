@@ -2,9 +2,10 @@ import React, { useEffect, useState } from 'react';
 import { Container, Row, Col, Card, Button, Form, Spinner, Table, Badge } from 'react-bootstrap';
 import { supabase } from '../../lib/supabase';
 import { Users, ShoppingCart, MessageSquare, MapPin, ArrowRight, Eye, PlusCircle } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useOutletContext } from 'react-router-dom';
 
 const Dashboard = () => {
+    const { userRole } = useOutletContext();
     const [stats, setStats] = useState({
         orders: 0,
         inquiries: 0,
@@ -150,25 +151,23 @@ const Dashboard = () => {
 
                 {/* Quick Actions & Counters */}
                 <Col lg={4}>
-                    <Card className="shadow-sm border-0 mb-4 text-black bg-light">
-                        <Card.Body className="p-4">
-                            <h5 className="fw-bold mb-4">Quick Actions</h5>
-                            <div className="d-grid gap-2">
-                                {/* <Button as={Link} to="/admin/pincodes" variant="outline-dark" className="text-start d-flex justify-content-between align-items-center border-opacity-25 mb-2 py-2">
-                                    <span>Update Pricing</span>
-                                    <PlusCircle size={18} />
-                                </Button> */} {/* Temporarily disabled - file missing */}
-                                <Button as={Link} to="/admin/testimonials" variant="outline-dark" className="text-start d-flex justify-content-between align-items-center border-opacity-25 mb-2 py-2">
-                                    <span>Manage Testimonials</span>
-                                    <PlusCircle size={18} />
-                                </Button>
-                                <Button as={Link} to="/admin/faqs" variant="outline-dark" className="text-start d-flex justify-content-between align-items-center border-opacity-25 py-2">
-                                    <span>Manage FAQs</span>
-                                    <PlusCircle size={18} />
-                                </Button>
-                            </div>
-                        </Card.Body>
-                    </Card>
+                    {(userRole === 'admin' || userRole === 'executive') && (
+                        <Card className="shadow-sm border-0 mb-4 text-black bg-light">
+                            <Card.Body className="p-4">
+                                <h5 className="fw-bold mb-4">Quick Actions</h5>
+                                <div className="d-grid gap-2">
+                                    <Button as={Link} to="/admin/testimonials" variant="outline-dark" className="text-start d-flex justify-content-between align-items-center border-opacity-25 mb-2 py-2">
+                                        <span>Manage Testimonials</span>
+                                        <PlusCircle size={18} />
+                                    </Button>
+                                    <Button as={Link} to="/admin/faqs" variant="outline-dark" className="text-start d-flex justify-content-between align-items-center border-opacity-25 py-2">
+                                        <span>Manage FAQs</span>
+                                        <PlusCircle size={18} />
+                                    </Button>
+                                </div>
+                            </Card.Body>
+                        </Card>
+                    )}
 
                     <Card className="shadow-sm border-0 overflow-hidden">
                         <Card.Header className="bg-white py-3 border-bottom"><h5 className="mb-0 fw-bold">Public Stats</h5></Card.Header>
@@ -181,8 +180,13 @@ const Dashboard = () => {
                                             size="sm"
                                             type="number"
                                             defaultValue={counter.value}
-                                            onBlur={(e) => handleCounterUpdate(counter.key, e.target.value)}
-                                            className="border-0 bg-light fw-bold"
+                                            readOnly={userRole === 'staff'}
+                                            onBlur={(e) => {
+                                                if (userRole !== 'staff') {
+                                                    handleCounterUpdate(counter.key, e.target.value);
+                                                }
+                                            }}
+                                            className={`border-0 bg-light fw-bold ${userRole === 'staff' ? 'cursor-not-allowed' : ''}`}
                                         />
                                         <div className="text-primary small fw-bold">LIVE</div>
                                     </div>

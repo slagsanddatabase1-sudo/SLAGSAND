@@ -227,9 +227,9 @@ const UserManagement = () => {
                                 value={formData.role}
                                 onChange={e => setFormData({ ...formData, role: e.target.value })}
                             >
-                                <option value="admin">Admin (Full Access)</option>
-                                <option value="executive">Executive (Operations Manager)</option>
-                                <option value="staff">Staff (Limited Access)</option>
+                                <option value="admin">Admin (Super Admin - Full Access)</option>
+                                <option value="executive">Executive (Business Manager)</option>
+                                <option value="staff">Staff (Operational View-only)</option>
                             </Form.Select>
                         </Form.Group>
 

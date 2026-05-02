@@ -1,13 +1,26 @@
 import React, { useState, useEffect } from 'react';
 import { Container, Table, Button, Badge, Spinner, Modal, Row, Col, Card } from 'react-bootstrap';
+import { useOutletContext } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
 import { Check, X, Eye, User, Mail, Phone, MapPin, Briefcase, Calendar, Trash2 } from 'lucide-react';
 
 const Marketers = () => {
+    const { userRole } = useOutletContext();
     const [marketers, setMarketers] = useState([]);
     const [loading, setLoading] = useState(true);
     const [selectedMarketer, setSelectedMarketer] = useState(null);
     const [showModal, setShowModal] = useState(false);
+
+    if (userRole === 'staff') {
+        return (
+            <Container className="p-5 text-center">
+                <div className="bg-white p-5 rounded-4 shadow-sm border">
+                    <h3 className="text-danger fw-bold">Access Denied</h3>
+                    <p className="text-muted">You do not have permission to view this page. Please contact your administrator if you believe this is an error.</p>
+                </div>
+            </Container>
+        );
+    }
 
     useEffect(() => {
         fetchMarketers();

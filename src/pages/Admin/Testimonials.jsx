@@ -1,14 +1,27 @@
 import React, { useState, useEffect } from 'react';
 import { Container, Table, Button, Form, Modal, Spinner, Badge } from 'react-bootstrap';
+import { useOutletContext } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
 import { Plus, Trash2, Edit, Star } from 'lucide-react';
 
 const Testimonials = () => {
+    const { userRole } = useOutletContext();
     const [testimonials, setTestimonials] = useState([]);
     const [loading, setLoading] = useState(true);
     const [showModal, setShowModal] = useState(false);
     const [formData, setFormData] = useState({ client_name: '', content: '' });
     const [editingId, setEditingId] = useState(null);
+
+    if (userRole === 'staff') {
+        return (
+            <Container className="p-5 text-center">
+                <div className="bg-white p-5 rounded-4 shadow-sm border">
+                    <h3 className="text-danger fw-bold">Access Denied</h3>
+                    <p className="text-muted">You do not have permission to view this page. Please contact your administrator if you believe this is an error.</p>
+                </div>
+            </Container>
+        );
+    }
 
     useEffect(() => {
         fetchTestimonials();
