@@ -26,27 +26,39 @@ console.log("✓ SUPABASE_SERVICE_ROLE_KEY:", process.env.SUPABASE_SERVICE_ROLE_
 console.log("✓ PORT:", process.env.PORT || 5000);
 
 const app = express();
-app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
 
-const allowedOriginPattern = /^(https:\/\/.*\.vercel\.app|https:\/\/.*\.onrender\.com)$/;
 const allowedOrigins = [
     "http://localhost:5173",
-    "http://localhost:4173"
+    "http://localhost:4173",
+    "http://127.0.0.1:5173",
+    "http://127.0.0.1:4173",
 ];
+
+const allowedOriginPattern = /^(https:\/\/.*\.vercel\.app|https:\/\/.*\.onrender\.com)$/;
+
 app.use(cors({
     origin: (origin, callback) => {
-        // Allow requests with no origin (e.g. Postman, curl, Render health checks)
+        // Allow requests with no origin (like mobile apps or curl)
         if (!origin) return callback(null, true);
-        // Allow any *.vercel.app or *.onrender.com subdomain or explicit localhost origins
-        if (allowedOriginPattern.test(origin) || allowedOrigins.includes(origin)) {
+
+        const isAllowed = allowedOrigins.includes(origin) || allowedOriginPattern.test(origin);
+
+        if (isAllowed) {
             callback(null, true);
         } else {
-            callback(new Error(`CORS blocked for origin: ${origin}`));
+            console.warn(`⚠️ CORS blocked for origin: ${origin}`);
+            // Instead of returning an error, we pass false to let CORS block it normally
+            callback(null, false);
         }
     },
-    credentials: true
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
+    credentials: true,
+    optionsSuccessStatus: 200
 }));
+
+app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
 
 // Initialize Razorpay once
 const razorpay = new Razorpay({
