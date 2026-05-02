@@ -85,7 +85,7 @@ const UserManagement = () => {
             const endpoint = editingUser ? '/api/admin/update-user' : '/api/admin/create-user';
             
             const payload = {
-                email: formData.email,
+                email: formData.email.trim().toLowerCase(),
                 role: formData.role
             };
 
@@ -125,7 +125,7 @@ const UserManagement = () => {
             const { error } = await supabase
                 .from('user_roles')
                 .update({ role: newRole })
-                .eq('email', email);
+                .ilike('email', email.trim());
 
             if (error) throw error;
 

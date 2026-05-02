@@ -194,16 +194,13 @@ app.post("/api/order", async (req, res) => {
 app.post("/api/admin/create-user", async (req, res) => {
     const { email, password, role } = req.body;
 
-    if (!email || !password || !role) {
-        return res.status(400).json({ error: "Email, password, and role are required" });
-    }
-
+    const cleanEmail = email.trim().toLowerCase();
     try {
-        console.log(`👤 Admin creating user: ${email} with role: ${role}`);
+        console.log(`👤 Admin creating user: ${cleanEmail} with role: ${role}`);
 
         // 1. Create user in Supabase Auth using Admin API
         const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({
-            email,
+            email: cleanEmail,
             password,
             email_confirm: true // Auto-confirm so users can log in immediately
         });
@@ -215,7 +212,7 @@ app.post("/api/admin/create-user", async (req, res) => {
             .from('user_roles')
             .upsert({
                 id: authData.user.id, // Use the actual Auth ID
-                email,
+                email: cleanEmail,
                 role,
                 status: 'active'
             }, { onConflict: 'email' });
@@ -233,15 +230,12 @@ app.post("/api/admin/create-user", async (req, res) => {
 app.post("/api/admin/update-user", async (req, res) => {
     const { id, email, password, role } = req.body;
 
-    if (!id || !email || !role) {
-        return res.status(400).json({ error: "User ID, email, and role are required" });
-    }
-
+    const cleanEmail = email.trim().toLowerCase();
     try {
-        console.log(`👤 Admin updating user: ${email} (ID: ${id})`);
+        console.log(`👤 Admin updating user: ${cleanEmail} (ID: ${id})`);
 
         // 1. Update user in Supabase Auth using Admin API
-        const updateData = { email };
+        const updateData = { email: cleanEmail };
         if (password && password.trim().length >= 6) {
             updateData.password = password;
         }
@@ -252,7 +246,7 @@ app.post("/api/admin/update-user", async (req, res) => {
         // 2. Update role in user_roles table
         const { error: dbError } = await supabaseAdmin
             .from('user_roles')
-            .update({ email, role })
+            .update({ email: cleanEmail, role })
             .eq('id', id);
 
         if (dbError) throw dbError;

@@ -69,12 +69,12 @@ const AdminLayout = () => {
             }
 
             // Fetch Role
-            const cleanEmail = user.email.trim();
+            const cleanEmail = user.email.trim().toLowerCase();
             console.log("Checking role for trimmed email:", cleanEmail);
             const { data, error } = await supabase
                 .from('user_roles')
                 .select('role, name')
-                .eq('email', cleanEmail)
+                .ilike('email', cleanEmail)
                 .single();
 
             if (error) {
@@ -87,8 +87,8 @@ const AdminLayout = () => {
                 if (data.name) setUserName(data.name); 
                 console.log("Role found in DB:", role, "Raw data:", data);
             } else {
-                console.warn("No role entry found for:", cleanEmail, "Defaulting to ADMIN access.");
-                setUserRole('admin'); // Fallback to admin for users created directly in Supabase
+                console.warn("No role entry found for:", cleanEmail);
+                setUserRole(null); // Strictly follow panel assignments
             }
         }
         setLoading(false);
@@ -140,7 +140,7 @@ const AdminLayout = () => {
                     <div className="d-flex align-items-center">
                         <div className="bg-primary rounded p-1 me-2 d-flex"><LayoutDashboard className="text-white" size={20} /></div>
                         <div>
-                            <span className="fw-bold h5 mb-0 text-dark tracking-tight d-block">Slagsand<span className="text-primary">{userRole ? userRole.charAt(0).toUpperCase() + userRole.slice(1) : 'Admin'}</span></span>
+                            <span className="fw-bold h5 mb-0 text-dark tracking-tight d-block">Slagsand<span className="text-primary">{userRole ? userRole.charAt(0).toUpperCase() + userRole.slice(1) : ''}</span></span>
                         </div>
                     </div>
                     {/* Desktop Collapse Button (Inside Sidebar) */}
@@ -241,7 +241,7 @@ const AdminLayout = () => {
                                         {user?.email?.[0].toUpperCase()}
                                     </div>
                                     <div className="d-none d-lg-block text-start lh-1 me-2">
-                                        <div className="fw-bold small">{userName ? userName.toUpperCase() : (userRole ? userRole.toUpperCase() : 'USER')}</div>
+                                        <div className="fw-bold small">{userName ? userName.toUpperCase() : (userRole ? userRole.toUpperCase() : 'NO ACCESS')}</div>
                                         {/* Only show role if it's different from the name to avoid double text */}
                                         {userName && userName.toUpperCase() !== userRole?.toUpperCase() && (
                                             <div className="text-primary fw-bold" style={{ fontSize: '0.65rem' }}>{userRole?.toUpperCase()}</div>
