@@ -110,9 +110,8 @@ const Checkout = () => {
                 key: razorpayKey,
                 amount: razorpayOrder.amount,
                 currency: razorpayOrder.currency,
-                name: "Slagwala",
-                description: "Order Payment",
-                // Intentionally omitted 'image' to allow Razorpay to use its default and avoid CORS issues
+                description: `Payment for Order #${order.id}`,
+                // 'name' and 'image' are omitted to allow Razorpay to use Dashboard settings
                 order_id: razorpayOrder.id,
                 handler: async function (response) {
                     console.log("✓ Payment successful, validating...");
@@ -165,9 +164,11 @@ const Checkout = () => {
                     name: order.user_details.name,
                     contact: order.user_details.contact,
                 },
-                theme: {
-                    color: "#000000"
+                notes: {
+                    order_id: order.id,
+                    customer_address: order.user_details.address
                 }
+                // 'theme' is omitted to use Dashboard brand colors
             };
 
             if (!window.Razorpay) {
