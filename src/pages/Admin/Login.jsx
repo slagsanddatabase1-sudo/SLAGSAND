@@ -43,7 +43,7 @@ const AdminLogin = () => {
                                 <Lock size={32} />
                             </div>
                             <h3 className="fw-bold text-dark">Welcome Back</h3>
-                            <p className="text-muted small">Sign in to manage Slagsand Admin</p>
+                            <p className="text-muted small">Sign in to manage Slagsand</p>
                         </div>
 
                         {error && (

@@ -120,18 +120,26 @@ const UserManagement = () => {
         }
     };
 
-    const handleUpdateRole = async (email, newRole) => {
+    const handleUpdateRole = async (userId, email, newRole) => {
         try {
-            const { error } = await supabase
-                .from('user_roles')
-                .update({ role: newRole })
-                .ilike('email', email.trim());
+            console.log(`Updating role for ${email} (ID: ${userId}) to ${newRole}`);
+            
+            let query = supabase.from('user_roles').update({ role: newRole });
+            
+            // Prefer ID for precision, fallback to Email
+            if (userId) {
+                query = query.eq('id', userId);
+            } else {
+                query = query.ilike('email', email.trim());
+            }
 
+            const { error } = await query;
             if (error) throw error;
 
             setMessage({ type: 'success', text: `Role updated for ${email} to ${newRole.toUpperCase()}` });
             fetchUsers();
         } catch (error) {
+            console.error('Role update error:', error);
             setMessage({ type: 'danger', text: error.message });
         }
     };
@@ -179,7 +187,7 @@ const UserManagement = () => {
                                                     <Form.Select
                                                         size="sm"
                                                         value={user.role}
-                                                        onChange={(e) => handleUpdateRole(user.email, e.target.value)}
+                                                        onChange={(e) => handleUpdateRole(user.id, user.email, e.target.value)}
                                                         className="w-auto border-0 bg-light fw-bold text-uppercase px-3 py-2 cursor-pointer"
                                                         style={{ fontSize: '0.75rem' }}
                                                     >

@@ -23,7 +23,7 @@ const NotificationDropdown = () => {
             // Fetch Recent Orders (Increase limit to show scroll)
             const { data: orders } = await supabase
                 .from('orders')
-                .select('id, customer_name, total_amount, created_at')
+                .select('id, amount, created_at, user_details')
                 .gt('created_at', yesterday)
                 .order('created_at', { ascending: false })
                 .limit(5);
@@ -49,7 +49,7 @@ const NotificationDropdown = () => {
                     id: `order-${o.id}`,
                     type: 'order',
                     title: 'New Order',
-                    description: `${o.customer_name} placed an order for ₹${o.total_amount}`,
+                    description: `${o.user_details?.name || 'Customer'} placed an order for ₹${o.amount}`,
                     time: new Date(o.created_at),
                     link: '/admin/orders'
                 })),

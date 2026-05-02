@@ -68,27 +68,43 @@ const AdminLayout = () => {
                 setUserName(prefix.charAt(0).toUpperCase() + prefix.slice(1));
             }
 
-            // Fetch Role
+            // Fetch Role - Robust Lookup
             const cleanEmail = user.email.trim().toLowerCase();
-            console.log("Checking role for trimmed email:", cleanEmail);
-            const { data, error } = await supabase
+            const userId = user.id;
+            
+            console.log("🔐 Checking role for:", cleanEmail, "(ID:", userId, ")");
+
+            // 1. Try fetching by ID first (most reliable)
+            let { data, error } = await supabase
                 .from('user_roles')
-                .select('role, name')
-                .ilike('email', cleanEmail)
-                .single();
+                .select('role')
+                .eq('id', userId)
+                .maybeSingle();
+
+            // 2. If not found by ID, try fetching by Email (fallback for manual entries)
+            if (!data && !error) {
+                console.log("ℹ️ No role found by ID, trying Email fallback...");
+                const emailResult = await supabase
+                    .from('user_roles')
+                    .select('role')
+                    .ilike('email', cleanEmail)
+                    .maybeSingle();
+                
+                data = emailResult.data;
+                error = emailResult.error;
+            }
 
             if (error) {
-                console.error("Supabase role fetch error:", error);
+                console.error("❌ Supabase role fetch error:", error.message);
             }
 
             if (data) {
                 const role = data.role?.toLowerCase().trim();
                 setUserRole(role);
-                if (data.name) setUserName(data.name); 
-                console.log("Role found in DB:", role, "Raw data:", data);
+                console.log("✅ Role applied:", role, "Raw data:", data);
             } else {
-                console.warn("No role entry found for:", cleanEmail);
-                setUserRole(null); // Strictly follow panel assignments
+                console.warn("⚠️ No role entry found in 'user_roles' table for user. Defaulting to 'no access'.");
+                setUserRole(null);
             }
         }
         setLoading(false);
