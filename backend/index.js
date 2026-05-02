@@ -34,7 +34,7 @@ const allowedOrigins = [
     "http://127.0.0.1:4173",
 ];
 
-const allowedOriginPattern = /^(https:\/\/.*\.vercel\.app|https:\/\/.*\.onrender\.com)$/;
+const allowedOriginPattern = /^(https:\/\/.*\.vercel\.app|https:\/\/.*\.onrender\.com|https:\/\/.*\.netlify\.app)$/;
 
 app.use(cors({
     origin: (origin, callback) => {
@@ -60,10 +60,17 @@ app.use(cors({
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
-// Initialize Razorpay once
+// Initialize Razorpay once - handle missing keys gracefully
+const razorpayKeyId = (process.env.RAZORPAY_KEY_ID || "").trim();
+const razorpayKeySecret = (process.env.RAZORPAY_KEY_SECRET || "").trim();
+
+if (!razorpayKeyId || !razorpayKeySecret) {
+    console.warn("⚠️ Razorpay keys are missing in environment variables!");
+}
+
 const razorpay = new Razorpay({
-    key_id: (process.env.RAZORPAY_KEY_ID || "").trim(),
-    key_secret: (process.env.RAZORPAY_KEY_SECRET || "").trim(),
+    key_id: razorpayKeyId,
+    key_secret: razorpayKeySecret,
 });
 
 // Request logging middleware
@@ -163,14 +170,15 @@ app.post("/api/order", async (req, res) => {
     }
     catch (err) {
         console.error("❌ Error creating Razorpay order:");
-        console.error("Error message:", err.message);
-        console.error("Error stack:", err.stack);
+        console.error("Error Name:", err.name);
+        console.error("Error Message:", err.message);
+        console.error("Razorpay Error Details:", JSON.stringify(err.error || err, null, 2));
 
         res.status(500).json({
             error: "Internal Server Error",
             message: err.message,
-            razorpay_error: err.error || undefined,
-            details: process.env.NODE_ENV === 'development' ? err.stack : undefined
+            razorpay_error: err.error || err,
+            suggestion: "Check if your Razorpay keys are correct and your account is active."
         });
     }
 })
