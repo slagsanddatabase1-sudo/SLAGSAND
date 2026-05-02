@@ -32,9 +32,11 @@ const allowedOrigins = [
     "http://localhost:4173",
     "http://127.0.0.1:5173",
     "http://127.0.0.1:4173",
+    "https://www.slagwala.com",
+    "https://slagwala.com",
 ];
 
-const allowedOriginPattern = /^(https:\/\/.*\.vercel\.app|https:\/\/.*\.onrender\.com|https:\/\/.*\.netlify\.app)$/;
+const allowedOriginPattern = /^(https:\/\/.*\.vercel\.app|https:\/\/.*\.onrender\.com|https:\/\/.*\.netlify\.app|https:\/\/.*\.slagwala\.com)$/;
 
 app.use(cors({
     origin: (origin, callback) => {
