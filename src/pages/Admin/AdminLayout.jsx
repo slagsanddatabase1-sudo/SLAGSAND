@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Outlet, Link, useNavigate, useLocation } from 'react-router-dom';
-import { Container, Nav, Navbar, Button, Spinner, Dropdown, Badge } from 'react-bootstrap';
+import { Container, Nav, Navbar, Button, Spinner, Dropdown, Badge, Toast, ToastContainer } from 'react-bootstrap';
 import { supabase } from '../../lib/supabase';
 import { LayoutDashboard, ShoppingBag, MapPin, Users, HelpCircle, MessageSquare, LogOut, Star, Menu, Bell, Search, Hash, ChevronLeft } from 'lucide-react';
 import NotificationDropdown from '../../components/Admin/NotificationDropdown';
@@ -17,8 +17,38 @@ const AdminLayout = () => {
     const [userRole, setUserRole] = useState(null);
     const [userName, setUserName] = useState('');
 
+    // Toast Notifications
+    const [showToast, setShowToast] = useState(false);
+    const [toastData, setToastData] = useState({ title: '', message: '', type: 'order' });
+
     useEffect(() => {
         checkUser();
+        
+        // Realtime Subscriptions for Popup Notifications
+        const orderChannel = supabase.channel('layout-orders')
+            .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'orders' }, (payload) => {
+                setToastData({
+                    title: 'New Order Received!',
+                    message: `A new order has been placed by ${payload.new.customer_name || 'a customer'}.`,
+                    type: 'order'
+                });
+                setShowToast(true);
+            }).subscribe();
+
+        const inquiryChannel = supabase.channel('layout-inquiries')
+            .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'inquiries' }, (payload) => {
+                setToastData({
+                    title: 'New Inquiry!',
+                    message: `You have a new inquiry from ${payload.new.name}.`,
+                    type: 'inquiry'
+                });
+                setShowToast(true);
+            }).subscribe();
+
+        return () => {
+            supabase.removeChannel(orderChannel);
+            supabase.removeChannel(inquiryChannel);
+        };
     }, []);
 
     const checkUser = async () => {
@@ -39,20 +69,26 @@ const AdminLayout = () => {
             }
 
             // Fetch Role
+            const cleanEmail = user.email.trim();
+            console.log("Checking role for trimmed email:", cleanEmail);
             const { data, error } = await supabase
                 .from('user_roles')
                 .select('role, name')
-                .eq('email', user.email)
+                .eq('email', cleanEmail)
                 .single();
 
+            if (error) {
+                console.error("Supabase role fetch error:", error);
+            }
+
             if (data) {
-                setUserRole(data.role);
-                if (data.name) setUserName(data.name); // Use DB name if available
+                const role = data.role?.toLowerCase().trim();
+                setUserRole(role);
+                if (data.name) setUserName(data.name); 
+                console.log("Role found in DB:", role, "Raw data:", data);
             } else {
-                // FALLBACK TO ADMIN TEMPORARILY
-                // This ensures you are not locked out while setting up roles.
-                console.warn("No role found for user, defaulting to ADMIN access.");
-                setUserRole('admin');
+                console.warn("No role entry found for:", cleanEmail, "Defaulting to ADMIN access.");
+                setUserRole('admin'); // Fallback to admin for users created directly in Supabase
             }
         }
         setLoading(false);
@@ -103,7 +139,9 @@ const AdminLayout = () => {
                 <div className="d-flex align-items-center justify-content-between px-4 py-4 border-bottom" style={{ height: '70px' }}>
                     <div className="d-flex align-items-center">
                         <div className="bg-primary rounded p-1 me-2 d-flex"><LayoutDashboard className="text-white" size={20} /></div>
-                        <span className="fw-bold h5 mb-0 text-dark tracking-tight">Slagsand<span className="text-primary">Admin</span></span>
+                        <div>
+                            <span className="fw-bold h5 mb-0 text-dark tracking-tight d-block">Slagsand<span className="text-primary">{userRole ? userRole.charAt(0).toUpperCase() + userRole.slice(1) : 'Admin'}</span></span>
+                        </div>
                     </div>
                     {/* Desktop Collapse Button (Inside Sidebar) */}
                     <Button
@@ -203,8 +241,12 @@ const AdminLayout = () => {
                                         {user?.email?.[0].toUpperCase()}
                                     </div>
                                     <div className="d-none d-lg-block text-start lh-1 me-2">
-                                        <div className="fw-bold small">{userName ? userName.toUpperCase() : userRole?.toUpperCase()}</div>
-                                        <div className="text-muted" style={{ fontSize: '0.7rem' }}>{user?.email}</div>
+                                        <div className="fw-bold small">{userName ? userName.toUpperCase() : (userRole ? userRole.toUpperCase() : 'USER')}</div>
+                                        {/* Only show role if it's different from the name to avoid double text */}
+                                        {userName && userName.toUpperCase() !== userRole?.toUpperCase() && (
+                                            <div className="text-primary fw-bold" style={{ fontSize: '0.65rem' }}>{userRole?.toUpperCase()}</div>
+                                        )}
+                                        <div className="text-muted" style={{ fontSize: '0.6rem' }}>{user?.email}</div>
                                     </div>
                                 </Dropdown.Toggle>
                                 <Dropdown.Menu className="shadow border-0 mt-2 rounded-3 p-2" style={{ minWidth: '200px' }}>
@@ -219,10 +261,30 @@ const AdminLayout = () => {
 
                 {/* Page Content */}
                 <main className="flex-grow-1 p-3 p-md-4">
-
                     <Outlet context={{ userRole }} />
                 </main>
             </div>
+
+            {/* Real-time Popups */}
+            <ToastContainer position="bottom-end" className="p-3" style={{ zIndex: 9999 }}>
+                <Toast show={showToast} onClose={() => setShowToast(false)} delay={5000} autohide className="border-0 shadow-lg rounded-3">
+                    <Toast.Header className={`bg-${toastData.type === 'order' ? 'primary' : 'info'} text-white border-0 rounded-top`}>
+                        {toastData.type === 'order' ? <ShoppingBag size={16} className="me-2" /> : <MessageSquare size={16} className="me-2" />}
+                        <strong className="me-auto">{toastData.title}</strong>
+                    </Toast.Header>
+                    <Toast.Body className="bg-white rounded-bottom">
+                        {toastData.message}
+                        <div className="mt-2 pt-2 border-top">
+                            <Button size="sm" variant="link" className="p-0 text-decoration-none fw-bold" onClick={() => {
+                                setShowToast(false);
+                                navigate(toastData.type === 'order' ? '/admin/orders' : '/admin/inquiries');
+                            }}>
+                                View Details
+                            </Button>
+                        </div>
+                    </Toast.Body>
+                </Toast>
+            </ToastContainer>
         </div>
     );
 };

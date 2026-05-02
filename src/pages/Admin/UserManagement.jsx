@@ -57,51 +57,64 @@ const UserManagement = () => {
     // Simplified: We only support creating new role entries or deleting them for now
     // Editing implies deleting and re-adding or we can add update logic if requested
     // For now, let's keep it simple: Add New User logic
+    const [editingUser, setEditingUser] = useState(null); // null = creating, user object = editing
+
     const handleEdit = (user) => {
-        // Placeholder if we want edit
+        setEditingUser(user);
+        setFormData({ 
+            email: user.email, 
+            password: '', // Keep empty unless changing
+            role: user.role 
+        });
+        setShowModal(true);
     };
 
     const resetModal = () => {
         setShowModal(false);
+        setEditingUser(null);
         setFormData({ email: '', password: '', role: 'executive' });
         setShowPassword(false);
     };
 
-    const handleCreateUser = async (e) => {
+    const handleFormSubmit = async (e) => {
         e.preventDefault();
         setInviting(true);
         setMessage(null);
         try {
             const baseUrl = import.meta.env.VITE_API_BASE_URL || 'https://slagsand.onrender.com';
-            const response = await fetch(`${baseUrl}/api/admin/create-user`, {
+            const endpoint = editingUser ? '/api/admin/update-user' : '/api/admin/create-user';
+            
+            const payload = {
+                email: formData.email,
+                role: formData.role
+            };
+
+            if (editingUser) {
+                payload.id = editingUser.id;
+                if (formData.password) payload.password = formData.password;
+            } else {
+                payload.password = formData.password;
+            }
+
+            const response = await fetch(`${baseUrl}${endpoint}`, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    email: formData.email,
-                    password: formData.password,
-                    role: formData.role
-                })
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
             });
 
             const data = await response.json();
-
-            if (!response.ok) {
-                throw new Error(data.error || 'Failed to create user');
-            }
+            if (!response.ok) throw new Error(data.error || 'Failed to process request');
 
             setMessage({
                 type: 'success',
-                text: `User ${formData.email} created successfully with role ${formData.role.toUpperCase()}.`
+                text: editingUser ? `User ${formData.email} updated successfully.` : `User ${formData.email} created successfully.`
             });
 
             resetModal();
-            fetchUsers(); // Refresh the list
-
+            fetchUsers();
         } catch (error) {
-            console.error('Error creating user:', error);
-            setMessage({ type: 'danger', text: `Failed to create user: ${error.message}` });
+            console.error('Error processing user:', error);
+            setMessage({ type: 'danger', text: `Error: ${error.message}` });
         } finally {
             setInviting(false);
         }
@@ -183,6 +196,14 @@ const UserManagement = () => {
                                                 <td className="text-end pe-4">
                                                     <Button
                                                         variant="link"
+                                                        className="text-primary p-0 me-3"
+                                                        onClick={() => handleEdit(user)}
+                                                        title="Edit User"
+                                                    >
+                                                        <Edit size={18} />
+                                                    </Button>
+                                                    <Button
+                                                        variant="link"
                                                         className="text-danger p-0"
                                                         onClick={() => handleDelete(user.email)}
                                                         title="Revoke Access"
@@ -205,11 +226,9 @@ const UserManagement = () => {
             )}
 
             <Modal show={showModal} onHide={resetModal}>
-                <Modal.Header closeButton><Modal.Title>Create New User</Modal.Title></Modal.Header>
+                <Modal.Header closeButton><Modal.Title>{editingUser ? 'Edit User' : 'Create New User'}</Modal.Title></Modal.Header>
                 <Modal.Body className="p-3 p-md-4">
-                    <Form onSubmit={handleCreateUser}>
-
-
+                    <Form onSubmit={handleFormSubmit}>
                         <Form.Group className="mb-3">
                             <Form.Label>Email Address</Form.Label>
                             <Form.Control
@@ -234,14 +253,14 @@ const UserManagement = () => {
                         </Form.Group>
 
                         <Form.Group className="mb-3">
-                            <Form.Label>Password</Form.Label>
+                            <Form.Label>Password {editingUser && <small className="text-muted">(Leave blank to keep current)</small>}</Form.Label>
                             <div className="input-group">
                                 <Form.Control
                                     type={showPassword ? "text" : "password"}
-                                    required
+                                    required={!editingUser}
                                     value={formData.password}
                                     onChange={e => setFormData({ ...formData, password: e.target.value })}
-                                    placeholder="Set a strong password"
+                                    placeholder={editingUser ? "Enter new password" : "Set a strong password"}
                                     minLength={6}
                                     className="border-end-0"
                                 />
@@ -256,7 +275,7 @@ const UserManagement = () => {
                         </Form.Group>
 
                         <Button type="submit" variant="primary" className="w-100" disabled={inviting}>
-                            {inviting ? 'Creating User...' : 'Create User'}
+                            {inviting ? 'Processing...' : (editingUser ? 'Update User' : 'Create User')}
                         </Button>
                     </Form>
                 </Modal.Body>

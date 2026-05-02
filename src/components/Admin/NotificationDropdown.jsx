@@ -87,8 +87,34 @@ const NotificationDropdown = () => {
 
     useEffect(() => {
         fetchNotifications();
-        const interval = setInterval(fetchNotifications, 60000); // Poll every minute
-        return () => clearInterval(interval);
+
+        // Subscribe to Realtime changes
+        const ordersChannel = supabase
+            .channel('orders-realtime')
+            .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'orders' }, () => {
+                fetchNotifications();
+            })
+            .subscribe();
+
+        const inquiriesChannel = supabase
+            .channel('inquiries-realtime')
+            .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'inquiries' }, () => {
+                fetchNotifications();
+            })
+            .subscribe();
+
+        const usersChannel = supabase
+            .channel('users-realtime')
+            .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'user_roles' }, () => {
+                fetchNotifications();
+            })
+            .subscribe();
+
+        return () => {
+            supabase.removeChannel(ordersChannel);
+            supabase.removeChannel(inquiriesChannel);
+            supabase.removeChannel(usersChannel);
+        };
     }, [dismissedIds, lastOpened]);
 
     const handleToggle = (isOpen) => {

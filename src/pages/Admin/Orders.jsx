@@ -6,6 +6,7 @@ import { useOutletContext } from 'react-router-dom';
 
 const Orders = () => {
     const { userRole } = useOutletContext();
+    console.log("Orders component received role:", userRole);
     const [orders, setOrders] = useState([]);
     const [loading, setLoading] = useState(true);
     const [selectedOrder, setSelectedOrder] = useState(null);

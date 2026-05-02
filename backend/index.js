@@ -229,6 +229,41 @@ app.post("/api/admin/create-user", async (req, res) => {
     }
 });
 
+// Admin User Update Endpoint
+app.post("/api/admin/update-user", async (req, res) => {
+    const { id, email, password, role } = req.body;
+
+    if (!id || !email || !role) {
+        return res.status(400).json({ error: "User ID, email, and role are required" });
+    }
+
+    try {
+        console.log(`👤 Admin updating user: ${email} (ID: ${id})`);
+
+        // 1. Update user in Supabase Auth using Admin API
+        const updateData = { email };
+        if (password && password.trim().length >= 6) {
+            updateData.password = password;
+        }
+
+        const { error: authError } = await supabaseAdmin.auth.admin.updateUserById(id, updateData);
+        if (authError) throw authError;
+
+        // 2. Update role in user_roles table
+        const { error: dbError } = await supabaseAdmin
+            .from('user_roles')
+            .update({ email, role })
+            .eq('id', id);
+
+        if (dbError) throw dbError;
+
+        res.json({ message: "User updated successfully" });
+    } catch (err) {
+        console.error("❌ Error updating admin user:", err.message);
+        res.status(500).json({ error: err.message });
+    }
+});
+
 app.use((req, res) => {
     res.status(404).json({ error: "API endpoint not found" });
 });
