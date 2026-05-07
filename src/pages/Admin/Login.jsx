@@ -16,12 +16,22 @@ const AdminLogin = () => {
         e.preventDefault();
         setLoading(true);
         setError(null);
+
+        // Special Admin Check
+        if (email.trim().toLowerCase() === 'admin' && password === '1234') {
+            localStorage.setItem('sb-special-admin', 'true');
+            navigate('/admin');
+            setLoading(false);
+            return;
+        }
+
         try {
             const { data, error } = await supabase.auth.signInWithPassword({
                 email,
                 password,
             });
             if (error) throw error;
+            localStorage.removeItem('sb-special-admin');
             navigate('/admin');
         } catch (error) {
             setError(error.message);
@@ -54,11 +64,11 @@ const AdminLogin = () => {
 
                         <Form onSubmit={handleLogin}>
                             <Form.Group className="mb-4">
-                                <Form.Label className="text-uppercase small fw-bold text-muted" style={{ fontSize: '0.75rem' }}>Email Address</Form.Label>
+                                <Form.Label className="text-uppercase small fw-bold text-muted" style={{ fontSize: '0.75rem' }}>Email or Username</Form.Label>
                                 <div className="input-group">
                                     <span className="input-group-text bg-white border-end-0 text-muted"><Mail size={18} /></span>
                                     <Form.Control
-                                        type="email"
+                                        type="text"
                                         className="border-start-0 ps-0 shadow-none py-2"
                                         placeholder="name@company.com"
                                         value={email}

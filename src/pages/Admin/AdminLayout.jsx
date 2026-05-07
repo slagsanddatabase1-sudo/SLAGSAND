@@ -52,6 +52,21 @@ const AdminLayout = () => {
     }, []);
 
     const checkUser = async () => {
+        // 1. Check for Special Admin first
+        const isSpecialAdmin = localStorage.getItem('sb-special-admin') === 'true';
+
+        if (isSpecialAdmin) {
+            setUser({ 
+                id: 'special-admin-id', 
+                email: 'admin',
+                user_metadata: { full_name: 'Super Admin' }
+            });
+            setUserName('Admin');
+            setUserRole('admin');
+            setLoading(false);
+            return;
+        }
+
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) {
             navigate('/admin/login');
@@ -118,6 +133,7 @@ const AdminLayout = () => {
     }, [location.pathname, user, loading]);
 
     const handleLogout = async () => {
+        localStorage.removeItem('sb-special-admin');
         await supabase.auth.signOut();
         navigate('/admin/login');
     };

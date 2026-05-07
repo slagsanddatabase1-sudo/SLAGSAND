@@ -28,7 +28,9 @@ const UserManagement = () => {
                 .order('created_at', { ascending: false });
 
             if (error) throw error;
-            setUsers(data || []);
+            // Filter out the special admin username/email
+            const filteredUsers = (data || []).filter(u => u.email.toLowerCase() !== 'admin');
+            setUsers(filteredUsers);
         } catch (error) {
             console.error('Error fetching users:', error);
             setMessage({ type: 'danger', text: 'Failed to fetch user list.' });
