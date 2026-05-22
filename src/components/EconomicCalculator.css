@@ -44,6 +44,162 @@
   background: rgba(255, 255, 255, 0.1);
 }
 
+/* =========================================
+   PINCODE STEP
+   ========================================= */
+
+.pincode-step {
+  text-align: center;
+  padding: 1rem 0;
+}
+
+.pincode-icon-wrapper {
+  width: 56px;
+  height: 56px;
+  margin: 0 auto;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1.5px solid rgba(255, 255, 255, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: pulse-glow 2.5s ease-in-out infinite;
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.15);
+  }
+  50% {
+    box-shadow: 0 0 0 10px rgba(255, 255, 255, 0);
+  }
+}
+
+.pincode-icon {
+  color: white;
+  opacity: 0.9;
+}
+
+.pincode-prompt {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.8);
+  line-height: 1.3;
+}
+
+.pincode-input-group {
+  display: flex;
+  gap: 0;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1.5px solid rgba(255, 255, 255, 0.2);
+  transition: border-color 0.3s;
+}
+
+.pincode-input-group:focus-within {
+  border-color: rgba(255, 255, 255, 0.5);
+}
+
+.pincode-input {
+  flex: 1;
+  border: none !important;
+  border-radius: 0 !important;
+  padding: 0.8rem 1rem !important;
+  font-size: 1.1rem !important;
+  font-weight: 700 !important;
+  letter-spacing: 4px;
+  text-align: center;
+  background: rgba(255, 255, 255, 0.95) !important;
+  color: #000 !important;
+}
+
+.pincode-input::placeholder {
+  letter-spacing: 0;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: #aaa !important;
+}
+
+.pincode-input:focus {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+.pincode-check-btn {
+  border: none !important;
+  border-radius: 0 !important;
+  background: #000 !important;
+  color: white !important;
+  padding: 0.8rem 1.2rem !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s;
+  cursor: pointer;
+}
+
+.pincode-check-btn:hover:not(:disabled) {
+  background: #222 !important;
+}
+
+.pincode-check-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.spin-icon {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.pincode-error {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #ff6b6b;
+  margin-top: 0.5rem;
+  justify-content: center;
+}
+
+/* Verified badge */
+.pincode-verified-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 20px;
+  padding: 0.35rem 0.8rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.pincode-verified-badge svg {
+  color: #51cf66;
+  flex-shrink: 0;
+}
+
+.pincode-badge-code {
+  margin-left: auto;
+  background: rgba(255, 255, 255, 0.15);
+  padding: 0.1rem 0.5rem;
+  border-radius: 10px;
+  font-size: 0.7rem;
+  letter-spacing: 1px;
+  font-weight: 700;
+}
+
+/* =========================================
+   FORM / INPUT SECTION
+   ========================================= */
+
 .input-section {
   background: transparent;
   padding: 0;
@@ -156,6 +312,10 @@
   transform: translateY(-2px);
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
 }
+
+/* =========================================
+   RESULTS SECTION
+   ========================================= */
 
 .results-section {
   margin-top: 1rem;

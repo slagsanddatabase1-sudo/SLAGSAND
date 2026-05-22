@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { RefreshCcw, TrendingUp, Calculator, AlertCircle } from 'lucide-react';
-import { Card, Button, Form, Row, Col, Spinner } from 'react-bootstrap';
+import { RefreshCcw, TrendingUp, Calculator, MapPin, CheckCircle, AlertCircle, ArrowRight, Loader } from 'lucide-react';
+import { Card, Button, Form, Spinner } from 'react-bootstrap';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useForm } from 'react-hook-form';
 import { supabase } from '../lib/supabase';
@@ -12,6 +12,13 @@ const EconomicCalculator = () => {
     const [loading, setLoading] = useState(true);
     const [isCustomQty, setIsCustomQty] = useState(false);
 
+    // Pincode state
+    const [pincode, setPincode] = useState('');
+    const [pincodeData, setPincodeData] = useState(null);
+    const [pincodeError, setPincodeError] = useState('');
+    const [pincodeLoading, setPincodeLoading] = useState(false);
+    const [pincodeVerified, setPincodeVerified] = useState(false);
+
     const { register, handleSubmit, setValue, watch, formState: { errors }, reset: resetForm } = useForm({
         defaultValues: {
             quantity: '40',
@@ -21,62 +28,94 @@ const EconomicCalculator = () => {
 
     const quantity = watch('quantity');
     const marketRate = watch('marketRate');
-    const [dynamicRates, setDynamicRates] = useState({
-        slag_basicrate: 1200,
-        forty_ton_hydraulic: 150,
-        thirty_ton_hydraulic: 180,
-        transportation_by_truck: 200,
-        unloading_charges: 50,
+
+    // Global conversion factors (not pincode-specific)
+    const [conversionFactors, setConversionFactors] = useState({
         marketConvFactor: 20,
         ourSqftFactor: 28
     });
 
     React.useEffect(() => {
-        fetchDynamicRates();
+        fetchConversionFactors();
     }, []);
 
-    const fetchDynamicRates = async () => {
+    const fetchConversionFactors = async () => {
         try {
             const { data, error } = await supabase
                 .from('global_configs')
                 .select('*')
-                .in('key', [
-                    'slag_basicrate', 
-                    'forty_ton_hydraulic',
-                    'thirty_ton_hydraulic',
-                    'transportation_by_truck',
-                    'unloading_charges',
-                    'calc_market_conv_factor',
-                    'calc_sqft_density'
-                ]);
+                .in('key', ['calc_market_conv_factor', 'calc_sqft_density']);
 
             if (error) {
-                console.warn('⚠️ Could not fetch dynamic rates from Supabase. Using default rates fallback.', error.message);
+                console.warn('⚠️ Could not fetch conversion factors. Using defaults.', error.message);
                 return;
             }
 
             if (data && data.length > 0) {
-                const configs = {};
+                const factors = { ...conversionFactors };
                 data.forEach(item => {
-                    configs[item.key] = parseFloat(item.value);
+                    if (item.key === 'calc_market_conv_factor') factors.marketConvFactor = parseFloat(item.value) || 20;
+                    if (item.key === 'calc_sqft_density') factors.ourSqftFactor = parseFloat(item.value) || 28;
                 });
-
-                const tonPriceFactors = {
-                    slag_basicrate: parseFloat(configs.slag_basicrate) || 1200,
-                    forty_ton_hydraulic: parseFloat(configs.forty_ton_hydraulic) || 150,
-                    thirty_ton_hydraulic: parseFloat(configs.thirty_ton_hydraulic) || parseFloat(configs.forty_ton_hydraulic) || 180,
-                    transportation_by_truck: parseFloat(configs.transportation_by_truck) || 200,
-                    unloading_charges: parseFloat(configs.unloading_charges) || 50,
-                    marketConvFactor: parseFloat(configs.calc_market_conv_factor) || 20,
-                    ourSqftFactor: parseFloat(configs.calc_sqft_density) || 28
-                };
-
-                setDynamicRates(tonPriceFactors);
+                setConversionFactors(factors);
             }
         } catch (err) {
-            console.error('Error fetching dynamic rates:', err);
+            console.error('Error fetching conversion factors:', err);
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handlePincodeCheck = async () => {
+        const cleanPincode = pincode.trim();
+        if (!cleanPincode || cleanPincode.length !== 6 || isNaN(cleanPincode)) {
+            setPincodeError('Please enter a valid 6-digit pincode');
+            return;
+        }
+
+        setPincodeLoading(true);
+        setPincodeError('');
+        setPincodeData(null);
+
+        try {
+            const { data, error } = await supabase
+                .from('pincodes')
+                .select('*')
+                .eq('pincode', cleanPincode)
+                .eq('is_active', true)
+                .limit(1);
+
+            if (error) throw error;
+
+            if (!data || data.length === 0) {
+                setPincodeError('Sorry, delivery is not available for this pincode yet.');
+                setPincodeVerified(false);
+                return;
+            }
+
+            const record = data[0];
+            const deliveryStatus = record.delivery_status || record.deliverystatus || '';
+            if (deliveryStatus === 'No Delivery') {
+                setPincodeError('Sorry, delivery is not available at this pincode.');
+                setPincodeVerified(false);
+                return;
+            }
+
+            setPincodeData(record);
+            setPincodeVerified(true);
+            setPincodeError('');
+        } catch (err) {
+            console.error('Error checking pincode:', err);
+            setPincodeError('Something went wrong. Please try again.');
+        } finally {
+            setPincodeLoading(false);
+        }
+    };
+
+    const handlePincodeKeyDown = (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            handlePincodeCheck();
         }
     };
 
@@ -84,31 +123,33 @@ const EconomicCalculator = () => {
         resetForm();
         setResults(null);
         setIsCustomQty(false);
+        setPincode('');
+        setPincodeData(null);
+        setPincodeError('');
+        setPincodeVerified(false);
     };
 
     const calculateSavings = (data) => {
-        const inputVal = parseFloat(data.marketRate);
-        if (isNaN(inputVal) || inputVal <= 0) {
-            return;
-        }
-        const currentQty = data.quantity;
+        if (!pincodeData) return;
 
-        let mRateTon, mRateSqFt;
-        const CONVERSION_FACTOR = dynamicRates.marketConvFactor;
-        
-        let ourRateTon = 0;
-        const { 
-            slag_basicrate: basic,
-            forty_ton_hydraulic: forty,
-            thirty_ton_hydraulic: thirty,
-            transportation_by_truck: transport,
-            unloading_charges: unloading,
-            ourSqftFactor: density
-        } = dynamicRates;
+        const inputVal = parseFloat(data.marketRate);
+        if (isNaN(inputVal) || inputVal <= 0) return;
+
+        const currentQty = data.quantity;
+        const CONVERSION_FACTOR = conversionFactors.marketConvFactor;
+        const density = conversionFactors.ourSqftFactor;
+
+        // Extract rates from the pincode record
+        const basic = parseFloat(pincodeData.slag_basicrate) || 0;
+        const forty = parseFloat(pincodeData.forty_ton_hydraulic) || 0;
+        const thirty = parseFloat(pincodeData.thirty_ton_hydraulic) || 0;
+        const transport = parseFloat(pincodeData.transportation_by_truck) || 0;
+        const unloading = parseFloat(pincodeData.unloading_charges) || 0;
 
         const rawQty = parseFloat(currentQty);
         const qtyVal = isSqFt ? rawQty / density : rawQty;
-        
+
+        let ourRateTon = 0;
         if (qtyVal >= 40) {
             ourRateTon = basic + forty;
         } else if (qtyVal >= 30) {
@@ -119,6 +160,7 @@ const EconomicCalculator = () => {
 
         const OUR_RATE_SQFT = ourRateTon / density;
 
+        let mRateTon, mRateSqFt;
         if (isSqFt) {
             mRateSqFt = inputVal;
             mRateTon = mRateSqFt * CONVERSION_FACTOR;
@@ -138,7 +180,8 @@ const EconomicCalculator = () => {
             savingsTon: savingsTon.toFixed(2),
             savingsSqFt: savingsSqFt.toFixed(2),
             totalSavings: (savingsTon * qtyVal).toFixed(2),
-            qty: currentQty
+            qty: currentQty,
+            city: pincodeData.city || pincodeData.City || ''
         });
     };
 
@@ -158,7 +201,7 @@ const EconomicCalculator = () => {
             >
                 <Calculator size={18} className="text-white opacity-75" />
                 <h6 className="mb-0 fw-bold header-title text-small">Economic Calculator</h6>
-                {results && (
+                {(pincodeVerified || results) && (
                     <button
                         className="reset-link ms-auto"
                         onClick={handleReset}
@@ -172,13 +215,76 @@ const EconomicCalculator = () => {
                 <div className="calculator-container">
                     <div className="calculator-card">
                         <AnimatePresence mode="wait">
-                            {!results ? (
+                            {/* STEP 1: PINCODE ENTRY */}
+                            {!pincodeVerified && !results && (
+                                <motion.div
+                                    key="pincode-step"
+                                    initial={{ opacity: 0, scale: 0.98 }}
+                                    animate={{ opacity: 1, scale: 1 }}
+                                    exit={{ opacity: 0, scale: 0.98 }}
+                                >
+                                    <div className="pincode-step p-1">
+                                        <div className="pincode-icon-wrapper mb-3">
+                                            <MapPin size={28} className="pincode-icon" />
+                                        </div>
+                                        <p className="pincode-prompt mb-3">
+                                            Enter your pincode to get location-based pricing
+                                        </p>
+                                        <div className="pincode-input-group mb-2">
+                                            <Form.Control
+                                                type="text"
+                                                className="pincode-input"
+                                                placeholder="Enter 6-digit pincode"
+                                                maxLength={6}
+                                                value={pincode}
+                                                onChange={(e) => {
+                                                    const val = e.target.value.replace(/\D/g, '');
+                                                    setPincode(val);
+                                                    setPincodeError('');
+                                                }}
+                                                onKeyDown={handlePincodeKeyDown}
+                                            />
+                                            <Button
+                                                className="pincode-check-btn"
+                                                onClick={handlePincodeCheck}
+                                                disabled={pincodeLoading || pincode.length !== 6}
+                                            >
+                                                {pincodeLoading ? (
+                                                    <Loader size={16} className="spin-icon" />
+                                                ) : (
+                                                    <ArrowRight size={16} />
+                                                )}
+                                            </Button>
+                                        </div>
+                                        {pincodeError && (
+                                            <motion.div
+                                                initial={{ opacity: 0, y: -5 }}
+                                                animate={{ opacity: 1, y: 0 }}
+                                                className="pincode-error"
+                                            >
+                                                <AlertCircle size={13} />
+                                                <span>{pincodeError}</span>
+                                            </motion.div>
+                                        )}
+                                    </div>
+                                </motion.div>
+                            )}
+
+                            {/* STEP 2: CALCULATOR FORM (after pincode verified) */}
+                            {pincodeVerified && !results && (
                                 <motion.div
                                     key="input-form"
                                     initial={{ opacity: 0, scale: 0.98 }}
                                     animate={{ opacity: 1, scale: 1 }}
                                     exit={{ opacity: 0, scale: 0.98 }}
                                 >
+                                    {/* Pincode verified badge */}
+                                    <div className="pincode-verified-badge mb-3">
+                                        <CheckCircle size={14} />
+                                        <span>{pincodeData?.city || pincode}</span>
+                                        <span className="pincode-badge-code">{pincode}</span>
+                                    </div>
+
                                     <Form className="input-section p-1" onSubmit={handleSubmit(calculateSavings)} noValidate>
                                         <div className="mb-3">
                                             <div className="d-flex justify-content-between align-items-center mb-1">
@@ -222,12 +328,14 @@ const EconomicCalculator = () => {
 
                                         <div className="toggle-group shadow-sm secondary-toggle mb-3">
                                             <button
+                                                type="button"
                                                 className={`btn-toggle ${!isSqFt ? 'active' : ''}`}
                                                 onClick={() => setIsSqFt(false)}
                                             >
                                                 Rate/Ton
                                             </button>
                                             <button
+                                                type="button"
                                                 className={`btn-toggle ${isSqFt ? 'active' : ''}`}
                                                 onClick={() => setIsSqFt(true)}
                                             >
@@ -262,7 +370,10 @@ const EconomicCalculator = () => {
                                             </Button>
                                     </Form>
                                 </motion.div>
-                            ) : (
+                            )}
+
+                            {/* STEP 3: RESULTS */}
+                            {results && (
                                 <motion.div
                                     key="results-view"
                                     initial={{ opacity: 0, scale: 0.95 }}
@@ -270,6 +381,13 @@ const EconomicCalculator = () => {
                                     exit={{ opacity: 0, scale: 0.95 }}
                                 >
                                     <div className="results-section pt-0 border-0">
+                                        {/* Location tag in results */}
+                                        <div className="pincode-verified-badge mb-3" style={{ justifyContent: 'center' }}>
+                                            <MapPin size={13} />
+                                            <span>{results.city || pincode}</span>
+                                            <span className="pincode-badge-code">{pincode}</span>
+                                        </div>
+
                                         <div className="result-grid">
                                             <div className="result-card">
                                                 <span className="result-label">Your Market Rate</span>
