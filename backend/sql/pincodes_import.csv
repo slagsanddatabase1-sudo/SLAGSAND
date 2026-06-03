@@ -1,0 +1,210 @@
+city,pincode,delivery_status,district,division,slag_basicrate,transportation_by_truck,unloading_charges,km,forty_ton_hydraulic,thirty_ton_hydraulic,twenty_ton_hydraulic,final_price,is_active
+Achalpur City,444808,Delivery,Amravati,Amaravati,600,450,80,0,500,550,0,0,True
+Achalpur City,444717,Delivery,Amravati,Amaravati,600,450,80,0,500,550,0,0,True
+Achalpur City,444806,Delivery,Amravati,Amaravati,600,450,80,0,500,550,0,0,True
+Akola,444107,Delivery,Akola,Akola,600,625,100,0,0,0,0,0,True
+Akola,444004,Delivery,Akola,Akola,600,625,100,0,0,0,0,0,True
+Akola,444111,Delivery,Akola,Akola,600,625,100,0,0,0,0,0,True
+Akola,444102,Delivery,Akola,Akola,600,625,100,0,0,0,0,0,True
+Akola,444101,Delivery,Akola,Akola,600,625,100,0,0,0,0,0,True
+Akola,444002,Delivery,Akola,Akola,600,625,100,0,0,0,0,0,True
+Akola,444126,Delivery,Akola,Akola,600,625,100,0,0,0,0,0,True
+Akola,444402,Delivery,Akola,Akola,600,625,100,0,0,0,0,0,True
+Akola,444405,Delivery,Akola,Akola,600,625,100,0,0,0,0,0,True
+Akola,444109,Delivery,Akola,Akola,600,625,100,0,0,0,0,0,True
+Akola,444407,Delivery,Akola,Akola,600,625,100,0,0,0,0,0,True
+Akola,444506,Delivery,Akola,Akola,600,625,100,0,0,0,0,0,True
+Akola,444501,Delivery,Akola,Akola,600,625,100,0,0,0,0,0,True
+Akola,444003,Delivery,Akola,Akola,600,625,100,0,0,0,0,0,True
+Akola,444311,Delivery,Akola,Akola,600,625,100,0,0,0,0,0,True
+Akola,444108,Delivery,Akola,Akola,600,625,100,0,0,0,0,0,True
+Akola,444106,Delivery,Akola,Akola,600,625,100,0,0,0,0,0,True
+Akola,444005,Delivery,Akola,Akola,600,625,100,0,0,0,0,0,True
+Akola,444117,Delivery,Akola,Akola,600,625,100,0,0,0,0,0,True
+Akola,444006,Delivery,Akola,Akola,600,625,100,0,0,0,0,0,True
+Akola,444502,Delivery,Akola,Akola,600,625,100,0,0,0,0,0,True
+Akola,444001,Delivery,Akola,Akola,600,625,100,0,0,0,0,0,True
+Akola,444104,Delivery,Akola,Akola,600,625,100,0,0,0,0,0,True
+Amaravati,444701,Delivery,Amravati,Amaravati,600,450,80,0,500,550,0,0,True
+Amravati,444601,Delivery,Amravati,Amaravati,600,450,80,0,500,550,0,0,True
+Amravati,444606,Delivery,Amravati,Amaravati,600,450,80,0,500,550,0,0,True
+Amravati,444605,Delivery,Amravati,Amaravati,600,450,80,0,500,550,0,0,True
+Amravati,444901,Delivery,Amravati,Amaravati,600,450,80,0,500,550,0,0,True
+Amravati,444604,Delivery,Amravati,Amaravati,600,450,80,0,500,550,0,0,True
+Amravati,444603,Delivery,Amravati,Amaravati,600,450,80,0,500,550,0,0,True
+Amravati,444602,Delivery,Amravati,Amaravati,600,450,80,0,500,550,0,0,True
+Amravati,444607,Delivery,Amravati,Amaravati,600,450,80,0,500,550,0,0,True
+Arjuni Morgaon,441702,Delivery,Gondia,Nagpur Moffusil,600,0,0,0,450,500,0,0,True
+Arjuni Morgaon,441701,Delivery,Gondia,Nagpur Moffusil,600,0,0,0,450,500,0,0,True
+Arni,445109,Delivery,Yavatmal,Yeotmal,600,0,0,0,350,400,450,0,True
+Arni,445110,Delivery,Yavatmal,Yeotmal,600,0,0,0,350,400,450,0,True
+Arni,445106,Delivery,Yavatmal,Yeotmal,600,0,0,0,350,400,450,0,True
+Arni,445103,Delivery,Yavatmal,Yeotmal,600,0,0,0,350,400,450,0,True
+Arni,445105,Delivery,Yavatmal,Yeotmal,600,0,0,0,350,400,450,0,True
+Arvi,442302,Delivery,Wardha,Wardha,600,0,0,0,250,325,375,0,True
+Arvi,442106,Delivery,Wardha,Wardha,600,0,0,0,250,325,375,0,True
+Arvi,442201,Delivery,Wardha,Wardha,600,0,0,0,250,325,375,0,True
+Ashti,442202,Delivery,Wardha,Wardha,600,0,0,0,250,325,375,0,True
+Barshitakli,444401,Delivery,Akola,Akola,600,625,100,0,0,0,0,0,True
+Bhadrawati,442404,Delivery,Chandrapur,Chandrapur,600,0,0,0,400,450,0,0,True
+Bhadrawati,442503,Delivery,Chandrapur,Chandrapur,600,0,0,0,400,450,0,0,True
+Bhadrawati,442902,Delivery,Chandrapur,Chandrapur,600,0,0,0,400,450,0,0,True
+Bhadrawati,442906,Delivery,Chandrapur,Chandrapur,600,0,0,0,400,450,0,0,True
+Bhandara,441906,Delivery,Bhandara,Nagpur Moffusil,600,200,0,0,200,250,0,0,True
+Bhandara,441904,Delivery,Bhandara,Nagpur Moffusil,600,200,0,0,200,250,0,0,True
+Bhandara,441905,Delivery,Bhandara,Nagpur Moffusil,600,200,0,0,200,250,0,0,True
+Bhandara,441924,Delivery,Bhandara,Nagpur Moffusil,600,200,0,0,200,250,0,0,True
+Bhatkuli,444802,Delivery,Amravati,Amaravati,600,450,80,0,500,550,0,0,True
+Bhatkuli,444801,Delivery,Amravati,Amaravati,600,450,80,0,500,550,0,0,True
+Bhatkuli,444706,Delivery,Amravati,Amaravati,600,450,100,0,500,550,0,0,True
+Bhatkuli,444804,Delivery,Amravati,Amaravati,600,450,100,0,500,550,0,0,True
+Bhiwapur,441203,Delivery,Nagpur,Nagpur Moffusil,600,0,0,0,400,450,500,0,True
+Bhiwapur,441201,Delivery,Nagpur,Nagpur Moffusil,600,0,0,0,400,450,500,0,True
+Chamorhsi,442707,Delivery,Gadchiroli,Chandrapur,600,0,0,0,450,500,0,0,True
+Chamorshi,442604,Delivery,Gadchiroli,Chandrapur,600,0,0,0,450,500,0,0,True
+Chamorshi,442603,Delivery,Gadchiroli,Chandrapur,600,0,0,0,450,500,0,0,True
+Chandrapur,442402,Delivery,Chandrapur,Chandrapur,600,0,0,0,400,450,0,0,True
+Chandrapur,442502,Delivery,Chandrapur,Chandrapur,600,0,0,0,400,450,0,0,True
+Chandrapur,442403,Delivery,Chandrapur,Chandrapur,600,0,0,0,400,450,0,0,True
+Chandrapur,442406,Delivery,Chandrapur,Chandrapur,600,0,0,0,400,450,0,0,True
+Chandrapur,442401,Delivery,Chandrapur,Chandrapur,600,0,0,0,400,450,0,0,True
+Chandrapur,441224,Delivery,Chandrapur,Chandrapur,600,0,0,0,400,450,0,0,True
+Chandrapur,442501,Delivery,Chandrapur,Chandrapur,600,0,0,0,400,450,0,0,True
+Chandrapur,442507,Delivery,Chandrapur,Chandrapur,600,0,0,0,400,450,0,0,True
+Chandrapur,442505,Delivery,Chandrapur,Chandrapur,600,0,0,0,400,450,0,0,True
+Chandur,442908,Delivery,Chandrapur,Chandrapur,600,0,0,0,400,450,0,0,True
+Chandur Bazar,444704,Delivery,Amravati,Amaravati,600,450,80,0,500,550,0,0,True
+Chandur Bazar,444810,Delivery,Amravati,Amaravati,600,450,100,0,500,550,0,0,True
+Chandur Bazar,444720,Delivery,Amravati,Amaravati,600,450,80,0,500,550,0,0,True
+Chandur Bazar,444723,Delivery,Amravati,Amaravati,600,450,80,0,500,550,0,0,True
+Chandur Railway,444904,Delivery,Amravati,Amaravati,600,450,100,0,500,550,0,0,True
+Chimur,442904,Delivery,Chandrapur,Chandrapur,600,0,0,0,400,450,0,0,True
+Chimur Bo,442903,Delivery,Chandrapur,Chandrapur,600,0,0,0,400,450,0,0,True
+Darwha,445202,Delivery,Yavatmal,Yeotmal,600,0,0,0,350,400,450,0,True
+Darwha,445201,Delivery,Yavatmal,Yeotmal,600,0,0,0,350,400,450,0,True
+Darwha,445210,Delivery,Yavatmal,Yeotmal,600,0,0,0,350,400,450,0,True
+Daryapu,444705,Delivery,Amravati,Amaravati,600,450,100,0,500,550,0,0,True
+Daryapur,444803,Delivery,Amravati,Amaravati,600,450,100,0,500,550,0,0,True
+Deoli,442306,Delivery,Wardha,Wardha,600,0,0,0,250,325,375,0,True
+Deoli,442101,Delivery,Wardha,Wardha,600,0,0,0,250,325,375,0,True
+Deoli,442303,Delivery,Wardha,Wardha,600,0,0,0,250,325,375,0,True
+Deori,441901,Delivery,Gondia,Nagpur Moffusil,600,0,0,0,450,500,0,0,True
+Desaiganj,441207,Delivery,Gadchiroli,Chandrapur,600,0,0,0,450,500,0,0,True
+Desaiganj,441207,Delivery,Chandrapur,Chandrapur,600,0,0,0,400,450,0,0,True
+Dhamangaon,444709,Delivery,Amravati,Amaravati,600,450,100,0,500,550,0,0,True
+Dhamangaon Rly,444710,Delivery,Amravati,Amaravati,600,450,100,0,500,550,0,0,True
+Dhamangaon Rly,444711,Delivery,Amravati,Amaravati,600,450,100,0,500,550,0,0,True
+Dhanora,442606,Delivery,Gadchiroli,Chandrapur,600,0,0,0,450,500,0,0,True
+Dharni,444813,Delivery,Amravati,Amaravati,600,450,100,0,500,550,0,0,True
+Digras,445203,Delivery,Yavatmal,Yeotmal,600,0,0,0,350,400,450,0,True
+Etapalli,442704,Delivery,Gadchiroli,Chandrapur,600,0,0,0,450,500,0,0,True
+Gadchiroli,442605,Delivery,Gadchiroli,Chandrapur,600,0,0,0,450,500,0,0,True
+Ghatanji,445306,Delivery,Yavatmal,Yeotmal,600,0,0,0,350,400,450,0,True
+Ghatanji,445301,Delivery,Yavatmal,Yeotmal,600,0,0,0,350,400,450,0,True
+Gondia,441614,Delivery,Gondia,Nagpur Moffusil,600,0,0,0,450,500,0,0,True
+Gondia,441601,Delivery,Gondia,Nagpur Moffusil,600,0,0,0,450,500,0,0,True
+Gondipipri,442702,Delivery,Chandrapur,Chandrapur,600,0,0,0,400,450,0,0,True
+Gondpipri,441226,Delivery,Chandrapur,Chandrapur,600,0,0,0,400,450,0,0,True
+Gondpipri,442701,Delivery,Chandrapur,Chandrapur,600,0,0,0,400,450,0,0,True
+Goregaon,441801,Delivery,Gondia,Nagpur Moffusil,600,0,0,0,450,500,0,0,True
+Goregaon,441807,Delivery,Gondia,Nagpur Moffusil,600,0,0,0,450,500,0,0,True
+Hinganghat,442304,Delivery,Wardha,Wardha,600,0,0,0,250,325,375,0,True
+Hinganghat,442307,Delivery,Wardha,Wardha,600,0,0,0,250,325,375,0,True
+Hinganghjat,442301,Delivery,Wardha,Wardha,600,0,0,0,250,325,375,0,True
+Hingna,441122,Delivery,Nagpur,Nagpur Moffusil,600,0,0,0,400,450,500,0,True
+Hingna,441110,Delivery,Nagpur,Nagpur Moffusil,600,0,0,0,400,450,500,0,True
+Hingna,440023,Delivery,Nagpur,Nagpur Moffusil,600,0,0,0,400,450,500,0,True
+Jiwati,442917,Delivery,Chandrapur,Chandrapur,600,0,0,0,400,450,0,0,True
+Kalamb,445401,Delivery,Yavatmal,Yeotmal,600,0,0,0,350,400,450,0,True
+Kalamb,445323,Delivery,Yavatmal,Yeotmal,600,0,0,0,350,400,450,0,True
+Kalamb,445002,Delivery,Yavatmal,Yeotmal,600,0,0,0,350,400,450,0,True
+Kalamb,445101,Delivery,Yavatmal,Yeotmal,600,0,0,0,350,400,450,0,True
+Kalameshwar,441501,Delivery,Nagpur,Nagpur Moffusil,600,0,0,0,400,450,500,0,True
+Kalapur,445302,Delivery,Yavatmal,Yeotmal,600,0,0,0,350,400,450,0,True
+Kalmeshwar,441502,Delivery,Nagpur,Nagpur Moffusil,600,0,0,0,400,450,500,0,True
+Kamptee,441101,Delivery,Nagpur,Nagpur Moffusil,600,0,0,0,400,450,500,0,True
+Kamptee,441102,Delivery,Nagpur,Nagpur Moffusil,600,0,0,0,400,450,500,0,True
+Kamthi,440026,Delivery,Nagpur,Nagpur Moffusil,600,0,0,0,400,450,500,0,True
+Kamthi,441001,Delivery,Nagpur,Nagpur Moffusil,600,0,0,0,400,450,500,0,True
+Kamthi,441123,Delivery,Nagpur,Nagpur Moffusil,600,0,0,0,400,450,500,0,True
+Kamthi,441111,Delivery,Nagpur,Nagpur Moffusil,600,0,0,0,400,450,500,0,True
+Karanja,444110,Delivery,Washim,Akola,600,650,100,0,0,0,0,0,True
+Karanja,442203,Delivery,Wardha,Wardha,600,0,0,0,250,325,375,0,True
+Katol,441103,Delivery,Nagpur,Nagpur Moffusil,600,0,0,0,400,450,500,0,True
+Katol,441302,Delivery,Nagpur,Nagpur Moffusil,600,0,0,0,400,450,500,0,True
+Katol,441305,Delivery,Nagpur,Nagpur Moffusil,600,0,0,0,400,450,500,0,True
+Kelapur,445308,Delivery,Yavatmal,Yeotmal,600,0,0,0,350,400,450,0,True
+Kelapur,445305,Delivery,Yavatmal,Yeotmal,600,0,0,0,350,400,450,0,True
+Korchi,441209,Delivery,Gadchiroli,Chandrapur,600,0,0,0,450,500,0,0,True
+Korpana,442916,Delivery,Chandrapur,Chandrapur,600,0,0,0,400,450,0,0,True
+Kuhi,441202,Delivery,Nagpur,Nagpur Moffusil,600,0,0,0,400,450,500,0,True
+Kurkheda,441217,Delivery,Gadchiroli,Chandrapur,600,0,0,0,450,500,0,0,True
+Lakhandur,441803,Delivery,Bhandara,Nagpur Moffusil,600,200,0,0,200,250,0,0,True
+Lakhani,441804,Delivery,Bhandara,Nagpur Moffusil,600,200,0,0,200,250,0,0,True
+Lakhni,441809,Delivery,Bhandara,Nagpur Moffusil,600,200,0,0,200,250,0,0,True
+Mahagaon,445230,Delivery,Yavatmal,Yeotmal,600,0,0,0,350,400,450,0,True
+Mahagaon,445205,Delivery,Yavatmal,Yeotmal,600,0,0,0,350,400,450,0,True
+Mahagaon,445204,Delivery,Yavatmal,Yeotmal,600,0,0,0,350,400,450,0,True
+Mangrulpir,444404,Delivery,Washim,Akola,600,650,100,0,800,0,0,0,True
+Mangrulpir,444403,Delivery,Washim,Akola,600,650,100,0,800,0,0,0,True
+Maregaon,445303,Delivery,Yavatmal,Yeotmal,600,0,0,0,350,400,450,0,True
+Mauda,441106,Delivery,Nagpur,Nagpur Moffusil,600,0,0,0,400,450,500,0,True
+Mauda,441104,Delivery,Nagpur,Nagpur Moffusil,600,0,0,0,400,450,500,0,True
+Mauda,441401,Delivery,Nagpur,Nagpur Moffusil,600,0,0,0,400,450,500,0,True
+Mohadi,441914,Delivery,Bhandara,Nagpur Moffusil,600,200,0,0,200,250,0,0,True
+Mohadi,441909,Delivery,Bhandara,Nagpur Moffusil,600,200,0,0,200,250,0,0,True
+Morshi,444905,Delivery,Amravati,Amaravati,600,450,100,0,500,550,0,0,True
+Morshi,444707,Delivery,Amravati,Amaravati,600,450,100,0,500,550,0,0,True
+NA,441222,Delivery,Chandrapur,Chandrapur,600,0,0,0,400,450,0,0,True
+NA,444907,Delivery,Amravati,Amaravati,600,450,100,0,500,550,0,0,True
+NA,442907,Delivery,Chandrapur,Chandrapur,600,0,0,0,400,450,0,0,True
+NA,444902,Delivery,Amravati,Amaravati,600,450,100,0,500,550,0,0,True
+NA,444903,Delivery,Amravati,Amaravati,600,450,100,0,500,550,0,0,True
+NA,444809,Delivery,Amravati,Amaravati,600,450,100,0,500,550,0,0,True
+NA,444807,Delivery,Amravati,Amaravati,600,450,100,0,500,550,0,0,True
+NA,444708,Delivery,Amravati,Amaravati,600,450,100,0,500,550,0,0,True
+NA,444719,Delivery,Amravati,Amaravati,600,450,100,0,500,550,0,0,True
+NA,444702,Delivery,Amravati,Amaravati,600,450,100,0,500,550,0,0,True
+NA,444906,Delivery,Amravati,Amaravati,600,450,100,0,500,550,0,0,True
+NA,444908,Delivery,Amravati,Amaravati,600,450,100,0,500,550,0,0,True
+NA,444507,Delivery,Washim,Akola,600,650,100,0,0,0,0,0,True
+NA,444511,Delivery,Akola,Akola,600,625,100,0,0,0,0,0,True
+NA,444302,Delivery,Akola,Akola,600,625,100,0,0,0,0,0,True
+NA,444409,Delivery,Washim,Akola,600,650,100,0,0,0,0,0,True
+NA,444103,Delivery,Akola,Akola,600,625,100,0,0,0,0,0,True
+NA,444105,Delivery,Washim,Akola,600,650,100,0,0,0,0,0,True
+NA,441210,Delivery,Nagpur,Nagpur Moffusil,600,0,0,0,400,450,500,0,True
+Nabhid,441205,Delivery,Chandrapur,Chandrapur,600,0,0,0,400,450,0,0,True
+Nagbhid,441221,Delivery,Chandrapur,Chandrapur,600,0,0,0,400,450,0,0,True
+Nagbhir,441206,Delivery,Chandrapur,Chandrapur,600,0,0,0,400,450,0,0,True
+Nagpur,440010,Delivery,Nagpur,Nagpur City,600,0,0,0,400,450,500,0,True
+Nagpur,440035,Delivery,Nagpur,Nagpur Moffusil,600,0,0,0,400,450,500,0,True
+Nagpur,440034,Delivery,Nagpur,Nagpur Moffusil,600,0,0,0,400,450,500,0,True
+Nagpur,440002,Delivery,Nagpur,Nagpur City,600,0,0,0,400,450,500,0,True
+Nagpur,440001,Delivery,Nagpur,Nagpur City,600,0,0,0,400,450,500,0,True
+Nagpur,440003,Delivery,Nagpur,Nagpur City,600,0,0,0,400,450,500,0,True
+Nagpur,440024,Delivery,Nagpur,Nagpur City,600,0,0,0,400,450,500,0,True
+Nagpur,440014,Delivery,Nagpur,Nagpur City,600,0,0,0,400,450,500,0,True
+Nagpur,440013,Delivery,Nagpur,Nagpur City,600,0,0,0,400,450,500,0,True
+Nagpur,440019,Delivery,Nagpur,Nagpur City,600,0,0,0,400,450,500,0,True
+Nagpur,440012,Delivery,Nagpur,Nagpur City,600,0,0,0,400,450,500,0,True
+Nagpur,440017,Delivery,Nagpur,Nagpur City,600,0,0,0,400,450,500,0,True
+Nagpur,440018,Delivery,Nagpur,Nagpur City,600,0,0,0,400,450,500,0,True
+Nagpur,440036,Delivery,Nagpur,Nagpur City,600,0,0,0,400,450,500,0,True
+Nagpur,440022,Delivery,Nagpur,Nagpur City,600,0,0,0,400,450,500,0,True
+Nagpur,440032,Delivery,Nagpur,Nagpur City,600,0,0,0,400,450,500,0,True
+Nagpur,440030,Delivery,Nagpur,Nagpur City,600,0,0,0,400,450,500,0,True
+Nagpur,440005,Delivery,Nagpur,Nagpur City,600,0,0,0,400,450,500,0,True
+Nagpur,440015,Delivery,Nagpur,Nagpur City,600,0,0,0,400,450,500,0,True
+Nagpur,440006,Delivery,Nagpur,Nagpur City,600,0,0,0,400,450,500,0,True
+Nagpur,440016,Delivery,Nagpur,Nagpur City,600,0,0,0,400,450,500,0,True
+Nagpur,440033,Delivery,Nagpur,Nagpur City,600,0,0,0,400,450,500,0,True
+Nagpur,440008,Delivery,Nagpur,Nagpur City,600,0,0,0,400,450,500,0,True
+Nagpur,440037,Delivery,Nagpur,Nagpur City,600,0,0,0,400,450,500,0,True
+Nagpur,440020,Delivery,Nagpur,Nagpur City,600,0,0,0,400,450,500,0,True
+Nagpur,440025,Delivery,Nagpur,Nagpur City,600,0,0,0,400,450,500,0,True
+Nagpur,440007,Delivery,Nagpur,Nagpur City,600,0,0,0,400,450,500,0,True
+Nagpur,440027,Delivery,Nagpur,Nagpur City,600,0,0,0,400,450,500,0,True
+Nagpur (Rural),441108,Delivery,Nagpur,Nagpur Moffusil,600,0,0,0,400,450,500,0,True
+Nagpur (Urban),440021,Delivery,Nagpur,Nagpur Moffusil,600,0,0,0,400,450,500,0,True
+Narkhed,441304,Delivery,Nagpur,Nagpur Moffusil,600,0,0,0,400,450,500,0,True
